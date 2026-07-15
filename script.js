@@ -439,8 +439,13 @@ class Wheel {
         // So angle -π/2 or 3π/2 is at 12 o'clock (top)
         const pointerAngle = -Math.PI / 2;
         
-        // Calculate what angle on the wheel is currently under the pointer
-        const angleAtPointer = (pointerAngle - normalizedRotation + 2 * Math.PI) % (2 * Math.PI);
+        // Calculate what angle on the wheel is currently under the pointer.
+        // Use the standard positive-modulo pattern ((a % m) + m) % m so that
+        // the result is always in [0, 2π) regardless of normalizedRotation.
+        // The naive form (a + 2π) % 2π can still produce a negative value when
+        // normalizedRotation > 3π/2 because JavaScript's % keeps the sign of the
+        // dividend, causing the fallback to always return slices[0] (Human).
+        const angleAtPointer = ((pointerAngle - normalizedRotation) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
         
         const totalProbability = this.slices.reduce((sum, s) => sum + s.probability, 0);
 

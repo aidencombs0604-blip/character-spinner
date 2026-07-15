@@ -367,7 +367,7 @@ class Wheel {
         this.ctx.lineWidth = 3;
         this.ctx.stroke();
 
-        // Draw pointer at top
+        // Draw pointer at top (at -π/2 which is straight up)
         this.ctx.fillStyle = '#ff6b6b';
         this.ctx.beginPath();
         this.ctx.moveTo(centerX, 20);
@@ -431,13 +431,20 @@ class Wheel {
     }
 
     getWinnerSlice(finalRotation) {
+        // The pointer is at the top (angle -π/2 or 3π/2)
+        // We need to check where the wheel stopped relative to this pointer
+        const pointerAngle = -Math.PI / 2;
         const normalizedRotation = (finalRotation % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        
+        // Calculate what angle is at the pointer
+        const wheelAngleAtPointer = (pointerAngle - this.currentRotation + 2 * Math.PI) % (2 * Math.PI);
+        
         const totalProbability = this.slices.reduce((sum, s) => sum + s.probability, 0);
 
         let currentAngle = 0;
         for (let slice of this.slices) {
             const sliceAngle = (slice.probability / totalProbability) * 2 * Math.PI;
-            if (normalizedRotation < currentAngle + sliceAngle) {
+            if (wheelAngleAtPointer >= currentAngle && wheelAngleAtPointer < currentAngle + sliceAngle) {
                 return slice;
             }
             currentAngle += sliceAngle;

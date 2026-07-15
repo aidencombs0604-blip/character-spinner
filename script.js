@@ -404,16 +404,16 @@ class Wheel {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                this.onSpinComplete(finalRotation);
+                this.onSpinComplete(endRotation);
             }
         };
 
         animate();
     }
 
-    onSpinComplete(finalRotation) {
+    onSpinComplete(endRotation) {
         // Determine which slice won
-        const winner = this.getWinnerSlice(finalRotation);
+        const winner = this.getWinnerSlice(endRotation);
 
         // Show flames animation
         this.playFlamesAnimation();
@@ -431,25 +431,30 @@ class Wheel {
     }
 
     getWinnerSlice(finalRotation) {
-        // The pointer is at the top (angle -π/2 or 3π/2)
-        // We need to check where the wheel stopped relative to this pointer
-        const pointerAngle = -Math.PI / 2;
-        const normalizedRotation = (finalRotation % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        // Normalize the rotation to 0-2π
+        const normalizedRotation = ((finalRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         
-        // Calculate what angle is at the pointer
-        const wheelAngleAtPointer = (pointerAngle - this.currentRotation + 2 * Math.PI) % (2 * Math.PI);
+        // The pointer is at the top (angle -π/2 or 3π/2 in standard coords)
+        // In our drawing, angle 0 is at 3 o'clock, angle π/2 is at 6 o'clock
+        // So angle -π/2 or 3π/2 is at 12 o'clock (top)
+        const pointerAngle = -Math.PI / 2;
+        
+        // Calculate what angle on the wheel is currently under the pointer
+        const angleAtPointer = (pointerAngle - normalizedRotation + 2 * Math.PI) % (2 * Math.PI);
         
         const totalProbability = this.slices.reduce((sum, s) => sum + s.probability, 0);
 
         let currentAngle = 0;
         for (let slice of this.slices) {
             const sliceAngle = (slice.probability / totalProbability) * 2 * Math.PI;
-            if (wheelAngleAtPointer >= currentAngle && wheelAngleAtPointer < currentAngle + sliceAngle) {
+            // Check if the pointer angle falls within this slice
+            if (angleAtPointer >= currentAngle && angleAtPointer < currentAngle + sliceAngle) {
                 return slice;
             }
             currentAngle += sliceAngle;
         }
 
+        // Fallback to first slice
         return this.slices[0];
     }
 

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Spinner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎡 Character Spinner</h1>
+            <p>Spin to discover your character!</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Wheel Section -->
+            <div class="wheel-section">
+                <div class="canvas-container">
+                    <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                    <button id="spinBtn" class="spin-button">SPIN</button>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h2>Slices</h2>
+                    <div id="slicesList" class="slices-list"></div>
+                    <button id="addSliceBtn" class="btn btn-primary">+ Add Slice</button>
+                </div>
+
+                <div class="panel-section">
+                    <h2>Add New Slice</h2>
+                    <input type="text" id="sliceName" placeholder="Slice name" class="input">
+                    <input type="number" id="sliceProbability" placeholder="Probability (1-100)" min="1" max="100" class="input">
+                    <input type="color" id="sliceColor" value="#FF6B6B" class="input">
+                    <button id="createSliceBtn" class="btn btn-success">Create</button>
+                </div>
+
+                <div class="panel-section">
+                    <h2>Result</h2>
+                    <div id="resultDisplay" class="result-display">
+                        <p>Spin to see result</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flames Animation Container -->
+        <div id="flamesContainer" class="flames-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

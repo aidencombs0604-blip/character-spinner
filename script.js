@@ -1,10 +1,15 @@
-// Wheel Spinner Application
+// Wheel Spinner Application with Branching Wheels
 
 class Wheel {
     constructor() {
         this.slices = [];
         this.isSpinning = false;
         this.currentRotation = 0;
+        this.wheelHistory = []; // Track wheel navigation
+        this.currentWheelId = 'main';
+        this.wheels = {}; // Store all wheels
+        this.selectedSliceForLink = null;
+        
         this.canvas = document.getElementById('wheelCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.spinBtn = document.getElementById('spinBtn');
@@ -12,8 +17,17 @@ class Wheel {
         this.createSliceBtn = document.getElementById('createSliceBtn');
         this.slicesListDiv = document.getElementById('slicesList');
         this.resultDisplay = document.getElementById('resultDisplay');
+        this.backBtn = document.getElementById('backBtn');
+        this.wheelTitle = document.getElementById('wheelTitle');
+        
+        // Modal elements
+        this.modal = document.getElementById('wheelModal');
+        this.closeModalBtn = document.querySelector('.close');
+        this.createWheelBtn = document.getElementById('createWheelBtn');
+        this.wheelsList = document.getElementById('wheelsList');
         
         this.initializeEventListeners();
+        this.loadFromStorage();
         this.addDefaultSlices();
         this.draw();
     }
@@ -22,6 +36,10 @@ class Wheel {
         this.spinBtn.addEventListener('click', () => this.spin());
         this.addSliceBtn.addEventListener('click', () => this.toggleAddForm());
         this.createSliceBtn.addEventListener('click', () => this.createSlice());
+        this.backBtn.addEventListener('click', () => this.goBack());
+        
+        this.closeModalBtn.addEventListener('click', () => this.closeModal());
+        this.createWheelBtn.addEventListener('click', () => this.createNewWheel());
         
         document.getElementById('sliceName').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.createSlice();
@@ -29,27 +47,32 @@ class Wheel {
     }
 
     addDefaultSlices() {
-        const defaultSlices = [
-            { name: 'Knight', probability: 20, color: '#FF6B6B' },
-            { name: 'Wizard', probability: 20, color: '#4ECDC4' },
-            { name: 'Archer', probability: 20, color: '#45B7D1' },
-            { name: 'Rogue', probability: 20, color: '#96CEB4' },
-            { name: 'Paladin', probability: 20, color: '#FFEAA7' }
-        ];
+        if (this.slices.length === 0) {
+            const defaultSlices = [
+                { name: 'Knight', probability: 20, color: '#FF6B6B' },
+                { name: 'Wizard', probability: 20, color: '#4ECDC4' },
+                { name: 'Archer', probability: 20, color: '#45B7D1' },
+                { name: 'Rogue', probability: 20, color: '#96CEB4' },
+                { name: 'Paladin', probability: 20, color: '#FFEAA7' }
+            ];
 
-        defaultSlices.forEach(slice => {
-            this.addSlice(slice.name, slice.probability, slice.color);
-        });
+            defaultSlices.forEach(slice => {
+                this.addSlice(slice.name, slice.probability, slice.color);
+            });
+        }
     }
 
     addSlice(name, probability, color) {
+        const sliceId = 'slice_' + Date.now();
         this.slices.push({
             name,
             probability,
             color,
-            id: Date.now()
+            id: sliceId,
+            linkedWheelId: null
         });
         this.updateUI();
+        this.saveToStorage();
         this.draw();
     }
 
@@ -76,6 +99,7 @@ class Wheel {
     deleteSlice(id) {
         this.slices = this.slices.filter(slice => slice.id !== id);
         this.updateUI();
+        this.saveToStorage();
         this.draw();
     }
 
@@ -84,22 +108,94 @@ class Wheel {
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
 
+    linkSliceToWheel(sliceId) {
+        this.selectedSliceForLink = sliceId;
+        const slice = this.slices.find(s => s.id === sliceId);
+        document.getElementById('sliceNameModal').textContent = slice.name;
+        
+        this.populateWheelsList();
+        this.openModal();
+    }
+
+    populateWheelsList() {
+        this.wheelsList.innerHTML = '';
+        Object.keys(this.wheels).forEach(wheelId => {
+            if (wheelId !== this.currentWheelId) {
+                const wheelOption = document.createElement('div');
+                wheelOption.className = 'wheel-option';
+                wheelOption.textContent = this.wheels[wheelId].name;
+                wheelOption.addEventListener('click', () => {
+                    this.selectWheelForLink(wheelId);
+                });
+                this.wheelsList.appendChild(wheelOption);
+            }
+        });
+    }
+
+    selectWheelForLink(wheelId) {
+        const slice = this.slices.find(s => s.id === this.selectedSliceForLink);
+        slice.linkedWheelId = wheelId;
+        this.saveToStorage();
+        this.updateUI();
+        this.closeModal();
+    }
+
+    createNewWheel() {
+        const wheelName = document.getElementById('newWheelName').value.trim();
+        if (!wheelName) {
+            alert('Please enter a wheel name');
+            return;
+        }
+
+        const wheelId = 'wheel_' + Date.now();
+        this.wheels[wheelId] = {
+            id: wheelId,
+            name: wheelName,
+            slices: []
+        };
+
+        this.selectWheelForLink(wheelId);
+    }
+
+    openModal() {
+        this.modal.classList.add('show');
+    }
+
+    closeModal() {
+        this.modal.classList.remove('show');
+        document.getElementById('newWheelName').value = '';
+    }
+
     updateUI() {
         // Update slices list
         this.slicesListDiv.innerHTML = '';
         this.slices.forEach(slice => {
             const sliceItem = document.createElement('div');
             sliceItem.className = 'slice-item';
+            
+            let linkedInfo = '';
+            if (slice.linkedWheelId) {
+                const linkedWheel = this.wheels[slice.linkedWheelId];
+                linkedInfo = `<div class="slice-linked">→ ${linkedWheel?.name || 'Unknown'}</div>`;
+            }
+            
             sliceItem.innerHTML = `
                 <div class="slice-color" style="background-color: ${slice.color}"></div>
                 <div class="slice-info">
                     <div class="slice-name">${slice.name}</div>
                     <div class="slice-probability">${slice.probability}%</div>
+                    ${linkedInfo}
                 </div>
-                <button class="slice-delete" onclick="wheel.deleteSlice(${slice.id})">Delete</button>
+                <div class="slice-actions">
+                    <button class="slice-link-btn" onclick="wheel.linkSliceToWheel('${slice.id}')">Link</button>
+                    <button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button>
+                </div>
             `;
             this.slicesListDiv.appendChild(sliceItem);
         });
+
+        // Update back button visibility
+        this.backBtn.style.display = this.wheelHistory.length > 0 ? 'block' : 'none';
     }
 
     draw() {
@@ -205,9 +301,13 @@ class Wheel {
         // Show flames animation
         this.playFlamesAnimation();
 
-        // After flames, show result
+        // After flames, show result or transition to linked wheel
         setTimeout(() => {
-            this.showResult(winner);
+            if (winner.linkedWheelId) {
+                this.transitionToWheel(winner.linkedWheelId);
+            } else {
+                this.showResult(winner);
+            }
             this.isSpinning = false;
             this.spinBtn.disabled = false;
         }, 2000);
@@ -227,6 +327,55 @@ class Wheel {
         }
 
         return this.slices[0];
+    }
+
+    transitionToWheel(wheelId) {
+        // Save current state to history
+        this.wheelHistory.push({
+            wheelId: this.currentWheelId,
+            slices: JSON.parse(JSON.stringify(this.slices))
+        });
+
+        // Load new wheel
+        this.currentWheelId = wheelId;
+        const newWheel = this.wheels[wheelId];
+        
+        if (newWheel.slices.length === 0) {
+            // New empty wheel, show result and allow adding slices
+            this.slices = [];
+            this.wheelTitle.textContent = newWheel.name;
+            this.showResult({ name: `Welcome to ${newWheel.name}!` });
+        } else {
+            // Load wheel slices
+            this.slices = JSON.parse(JSON.stringify(newWheel.slices));
+            this.wheelTitle.textContent = newWheel.name;
+        }
+
+        this.currentRotation = 0;
+        this.updateUI();
+        this.draw();
+    }
+
+    goBack() {
+        if (this.wheelHistory.length === 0) return;
+
+        // Save current state
+        if (this.currentWheelId !== 'main') {
+            this.wheels[this.currentWheelId].slices = JSON.parse(JSON.stringify(this.slices));
+        }
+
+        // Pop previous state
+        const previousState = this.wheelHistory.pop();
+        this.currentWheelId = previousState.wheelId;
+        this.slices = previousState.slices;
+        
+        const wheelName = this.currentWheelId === 'main' ? 'Main Wheel' : this.wheels[this.currentWheelId]?.name;
+        this.wheelTitle.textContent = wheelName;
+
+        this.currentRotation = 0;
+        this.saveToStorage();
+        this.updateUI();
+        this.draw();
     }
 
     playFlamesAnimation() {
@@ -253,6 +402,30 @@ class Wheel {
                 <div>You got: <strong>${slice.name}</strong></div>
             </div>
         `;
+    }
+
+    saveToStorage() {
+        const data = {
+            wheels: this.wheels,
+            currentWheelId: this.currentWheelId,
+            mainSlices: this.currentWheelId === 'main' ? this.slices : undefined
+        };
+        localStorage.setItem('wheelSpinnerData', JSON.stringify(data));
+    }
+
+    loadFromStorage() {
+        const data = localStorage.getItem('wheelSpinnerData');
+        if (data) {
+            try {
+                const parsed = JSON.parse(data);
+                this.wheels = parsed.wheels || {};
+                if (parsed.mainSlices) {
+                    this.slices = parsed.mainSlices;
+                }
+            } catch (e) {
+                console.log('Could not load saved data');
+            }
+        }
     }
 }
 

@@ -28,6 +28,7 @@ body {
     padding: 40px 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    position: relative;
 }
 
 .header h1 {
@@ -38,6 +39,25 @@ body {
 .header p {
     font-size: 1.1rem;
     opacity: 0.9;
+}
+
+.back-button {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    border: 2px solid white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .main-content {
@@ -159,6 +179,33 @@ body {
     color: #666;
 }
 
+.slice-linked {
+    font-size: 0.75rem;
+    color: #4ECDC4;
+    font-weight: bold;
+    margin-top: 3px;
+}
+
+.slice-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.slice-link-btn {
+    background: #4ECDC4;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.3s ease;
+}
+
+.slice-link-btn:hover {
+    background: #2ba89f;
+}
+
 .slice-delete {
     background: #ff6b6b;
     color: white;
@@ -242,6 +289,90 @@ body {
     font-weight: bold;
 }
 
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close:hover {
+    color: #000;
+}
+
+.modal-section {
+    margin-bottom: 25px;
+}
+
+.modal-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.wheels-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.wheel-option {
+    padding: 10px;
+    background: #f8f9fa;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.wheel-option:hover {
+    border-color: #667eea;
+    background: #f0f2ff;
+}
+
+.wheel-option.selected {
+    border-color: #667eea;
+    background: #e8ebff;
+    font-weight: bold;
+}
+
 /* Flames Animation */
 .flames-container {
     position: fixed;
@@ -309,5 +440,9 @@ body {
         width: 60px;
         height: 60px;
         font-size: 0.8rem;
+    }
+
+    .modal-content {
+        margin: 20px;
     }
 }

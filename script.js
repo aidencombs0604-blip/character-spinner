@@ -28,6 +28,7 @@ class Wheel {
         
         this.initializeEventListeners();
         this.loadFromStorage();
+        this.createPredefinedWheels();
         this.addDefaultSlices();
         this.draw();
     }
@@ -46,19 +47,135 @@ class Wheel {
         });
     }
 
+    createPredefinedWheels() {
+        // Only create if storage is empty
+        if (Object.keys(this.wheels).length > 0) return;
+
+        // Human Archetypes
+        const humanId = 'wheel_human';
+        this.wheels[humanId] = {
+            id: humanId,
+            name: '👨 Human Archetypes',
+            slices: [
+                { id: 'h1', name: 'Mage', probability: 20, color: '#9B59B6', linkedWheelId: null },
+                { id: 'h2', name: 'Gladiator', probability: 20, color: '#E74C3C', linkedWheelId: null },
+                { id: 'h3', name: 'Archer', probability: 20, color: '#F39C12', linkedWheelId: null },
+                { id: 'h4', name: 'Rogue', probability: 20, color: '#2C3E50', linkedWheelId: null },
+                { id: 'h5', name: 'Paladin', probability: 20, color: '#F1C40F', linkedWheelId: null }
+            ]
+        };
+
+        // Dragon Types
+        const dragonId = 'wheel_dragon';
+        this.wheels[dragonId] = {
+            id: dragonId,
+            name: '🐉 Dragon Types',
+            slices: [
+                { id: 'd1', name: 'Fire Dragon', probability: 20, color: '#E74C3C', linkedWheelId: null },
+                { id: 'd2', name: 'Ice Dragon', probability: 20, color: '#3498DB', linkedWheelId: null },
+                { id: 'd3', name: 'Lightning Dragon', probability: 20, color: '#F1C40F', linkedWheelId: null },
+                { id: 'd4', name: 'Shadow Dragon', probability: 20, color: '#2C3E50', linkedWheelId: null },
+                { id: 'd5', name: 'Gold Dragon', probability: 20, color: '#F39C12', linkedWheelId: null }
+            ]
+        };
+
+        // Angel Types
+        const angelId = 'wheel_angel';
+        this.wheels[angelId] = {
+            id: angelId,
+            name: '😇 Angel Types',
+            slices: [
+                { id: 'a1', name: 'Holy Angel', probability: 20, color: '#F1C40F', linkedWheelId: null },
+                { id: 'a2', name: 'Guardian Angel', probability: 20, color: '#3498DB', linkedWheelId: null },
+                { id: 'a3', name: 'Messenger Angel', probability: 20, color: '#9B59B6', linkedWheelId: null },
+                { id: 'a4', name: 'Fallen Angel', probability: 20, color: '#95A5A6', linkedWheelId: null },
+                { id: 'a5', name: 'Warrior Angel', probability: 20, color: '#E74C3C', linkedWheelId: null }
+            ]
+        };
+
+        // Demon Types
+        const demonId = 'wheel_demon';
+        this.wheels[demonId] = {
+            id: demonId,
+            name: '😈 Demon Types',
+            slices: [
+                { id: 'dm1', name: 'Imp', probability: 20, color: '#E67E22', linkedWheelId: null },
+                { id: 'dm2', name: 'Succubus', probability: 20, color: '#E74C3C', linkedWheelId: null },
+                { id: 'dm3', name: 'Overlord', probability: 20, color: '#2C3E50', linkedWheelId: null },
+                { id: 'dm4', name: 'Corrupted', probability: 20, color: '#16A085', linkedWheelId: null },
+                { id: 'dm5', name: 'Trickster', probability: 20, color: '#8E44AD', linkedWheelId: null }
+            ]
+        };
+
+        // Golem Materials
+        const golemId = 'wheel_golem';
+        this.wheels[golemId] = {
+            id: golemId,
+            name: '🔨 Golem Materials',
+            slices: [
+                { id: 'g1', name: 'Steel Golem', probability: 20, color: '#95A5A6', linkedWheelId: null },
+                { id: 'g2', name: 'Gold Golem', probability: 20, color: '#F1C40F', linkedWheelId: null },
+                { id: 'g3', name: 'Silver Golem', probability: 20, color: '#BDC3C7', linkedWheelId: null },
+                { id: 'g4', name: 'Stone Golem', probability: 20, color: '#7F8C8D', linkedWheelId: null },
+                { id: 'g5', name: 'Clay Golem', probability: 20, color: '#D35400', linkedWheelId: null }
+            ]
+        };
+
+        // Elf Types
+        const elfId = 'wheel_elf';
+        this.wheels[elfId] = {
+            id: elfId,
+            name: '🧝 Elf Types',
+            slices: [
+                { id: 'e1', name: 'High Elf', probability: 20, color: '#F39C12', linkedWheelId: null },
+                { id: 'e2', name: 'Dark Elf', probability: 20, color: '#2C3E50', linkedWheelId: null },
+                { id: 'e3', name: 'Wood Elf', probability: 20, color: '#27AE60', linkedWheelId: null },
+                { id: 'e4', name: 'Sea Elf', probability: 20, color: '#3498DB', linkedWheelId: null },
+                { id: 'e5', name: 'Twilight Elf', probability: 20, color: '#9B59B6', linkedWheelId: null }
+            ]
+        };
+
+        // Dwarf Types
+        const dwarfId = 'wheel_dwarf';
+        this.wheels[dwarfId] = {
+            id: dwarfId,
+            name: '⛏️ Dwarf Types',
+            slices: [
+                { id: 'dw1', name: 'Blacksmith Dwarf', probability: 20, color: '#95A5A6', linkedWheelId: null },
+                { id: 'dw2', name: 'Miner Dwarf', probability: 20, color: '#7F8C8D', linkedWheelId: null },
+                { id: 'dw3', name: 'Berserker Dwarf', probability: 20, color: '#E74C3C', linkedWheelId: null },
+                { id: 'dw4', name: 'Mountain Dwarf', probability: 20, color: '#95A5A6', linkedWheelId: null },
+                { id: 'dw5', name: 'Rune Dwarf', probability: 20, color: '#F1C40F', linkedWheelId: null }
+            ]
+        };
+    }
+
     addDefaultSlices() {
         if (this.slices.length === 0) {
-            const defaultSlices = [
-                { name: 'Knight', probability: 20, color: '#FF6B6B' },
-                { name: 'Wizard', probability: 20, color: '#4ECDC4' },
-                { name: 'Archer', probability: 20, color: '#45B7D1' },
-                { name: 'Rogue', probability: 20, color: '#96CEB4' },
-                { name: 'Paladin', probability: 20, color: '#FFEAA7' }
+            const races = [
+                { name: '👨 Human', probability: 17, color: '#E8B8A0', linkedWheelId: 'wheel_human' },
+                { name: '🐉 Dragon', probability: 17, color: '#E74C3C', linkedWheelId: 'wheel_dragon' },
+                { name: '😇 Angel', probability: 17, color: '#F1C40F', linkedWheelId: 'wheel_angel' },
+                { name: '😈 Demon', probability: 17, color: '#8E44AD', linkedWheelId: 'wheel_demon' },
+                { name: '🔨 Golem', probability: 17, color: '#95A5A6', linkedWheelId: 'wheel_golem' },
+                { name: '🧝 Elf', probability: 17, color: '#27AE60', linkedWheelId: 'wheel_elf' },
+                { name: '⛏️ Dwarf', probability: 2, color: '#D35400', linkedWheelId: 'wheel_dwarf' }
             ];
 
-            defaultSlices.forEach(slice => {
-                this.addSlice(slice.name, slice.probability, slice.color);
+            races.forEach(race => {
+                const sliceId = 'slice_' + Date.now() + Math.random();
+                this.slices.push({
+                    name: race.name,
+                    probability: race.probability,
+                    color: race.color,
+                    id: sliceId,
+                    linkedWheelId: race.linkedWheelId
+                });
             });
+
+            this.updateUI();
+            this.saveToStorage();
+            this.draw();
         }
     }
 
@@ -304,7 +421,7 @@ class Wheel {
         // After flames, show result or transition to linked wheel
         setTimeout(() => {
             if (winner.linkedWheelId) {
-                this.transitionToWheel(winner.linkedWheelId);
+                this.transitionToWheel(winner.linkedWheelId, winner.name);
             } else {
                 this.showResult(winner);
             }
@@ -329,7 +446,7 @@ class Wheel {
         return this.slices[0];
     }
 
-    transitionToWheel(wheelId) {
+    transitionToWheel(wheelId, raceName) {
         // Save current state to history
         this.wheelHistory.push({
             wheelId: this.currentWheelId,
@@ -341,7 +458,7 @@ class Wheel {
         const newWheel = this.wheels[wheelId];
         
         if (newWheel.slices.length === 0) {
-            // New empty wheel, show result and allow adding slices
+            // New empty wheel
             this.slices = [];
             this.wheelTitle.textContent = newWheel.name;
             this.showResult({ name: `Welcome to ${newWheel.name}!` });
@@ -349,6 +466,7 @@ class Wheel {
             // Load wheel slices
             this.slices = JSON.parse(JSON.stringify(newWheel.slices));
             this.wheelTitle.textContent = newWheel.name;
+            this.showResult({ name: `You selected ${raceName}!` });
         }
 
         this.currentRotation = 0;

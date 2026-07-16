@@ -1,6 +1,6 @@
 // Hierarchical wheel editor for the main race wheel and every linked wheel.
 (function () {
-    const palette = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F', '#2ECC71', '#3498DB'];
+    const palette = ['#4A1065', '#6B0A0A', '#7A4A00', '#1A2030', '#8B6914', '#1A5C2A', '#0A2E6B'];
 
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>'"]/g, character => ({

@@ -1,30 +1,51 @@
 // Force-rebuild the original race wheel and all predefined race links.
 (function () {
     const definitions = [
-        ['human', '👨 Human', '👨 Human Archetypes', ['Mage', 'Gladiator', 'Archer', 'Rogue', 'Paladin'], '#E8B8A0'],
-        ['dragon', '🐉 Dragon', '🐉 Dragon Types', ['Fire Dragon', 'Ice Dragon', 'Lightning Dragon', 'Shadow Dragon', 'Gold Dragon'], '#E74C3C'],
-        ['angel', '😇 Angel', '😇 Angel Types', ['Holy Angel', 'Guardian Angel', 'Messenger Angel', 'Fallen Angel', 'Warrior Angel'], '#F1C40F'],
-        ['demon', '😈 Demon', '😈 Demon Types', ['Imp', 'Succubus', 'Overlord', 'Corrupted', 'Trickster'], '#8E44AD'],
-        ['golem', '🔨 Golem', '🔨 Golem Materials', ['Steel Golem', 'Gold Golem', 'Silver Golem', 'Stone Golem', 'Clay Golem'], '#95A5A6'],
-        ['elf', '🧝 Elf', '🧝 Elf Types', ['High Elf', 'Dark Elf', 'Wood Elf', 'Sea Elf', 'Twilight Elf'], '#27AE60'],
-        ['dwarf', '⛏️ Dwarf', '⛏️ Dwarf Types', ['Blacksmith Dwarf', 'Miner Dwarf', 'Berserker Dwarf', 'Mountain Dwarf', 'Rune Dwarf'], '#D35400'],
-        ['orc', '👹 Orc', '👹 Orc Clans', ['War Chief', 'Berserker', 'Shaman', 'Raider', 'Beast Rider'], '#5D8C3D'],
-        ['goblin', '👺 Goblin', '👺 Goblin Types', ['Cave Goblin', 'Hobgoblin', 'Goblin Tinkerer', 'Goblin Rogue', 'Goblin King'], '#7CB342'],
-        ['troll', '🧌 Troll', '🧌 Troll Types', ['Mountain Troll', 'River Troll', 'Forest Troll', 'Ice Troll', 'Bridge Troll'], '#607D8B'],
-        ['undead', '💀 Undead', '💀 Undead Types', ['Skeleton', 'Zombie', 'Wraith', 'Vampire', 'Lich'], '#455A64'],
-        ['halfling', '🧑‍🌾 Halfling', '🧑‍🌾 Halfling Archetypes', ['Burglar', 'Innkeeper', 'Farmer', 'Storyteller', 'Lucky Wanderer'], '#A1887F'],
-        ['gnome', '🧙 Gnome', '🧙 Gnome Types', ['Inventor', 'Illusionist', 'Alchemist', 'Clockmaker', 'Garden Gnome'], '#00ACC1'],
-        ['fae', '🧚 Fae', '🧚 Fae Types', ['Pixie', 'Dryad', 'Sprite', 'Satyr', 'Fairy Queen'], '#EC407A'],
-        ['merfolk', '🧜 Merfolk', '🧜 Merfolk Types', ['Tide Caller', 'Pearl Diver', 'Siren', 'Reef Guardian', 'Sea King'], '#2196F3'],
-        ['giant', '🗻 Giant', '🗻 Giant Types', ['Storm Giant', 'Fire Giant', 'Frost Giant', 'Stone Giant', 'Cloud Giant'], '#795548'],
-        ['beastfolk', '🐾 Beastfolk', '🐾 Beastfolk Archetypes', ['Wolf Warrior', 'Cat Scout', 'Bear Guardian', 'Fox Trickster', 'Raven Seer'], '#8D6E63'],
-        ['elemental', '🌪️ Elemental', '🌪️ Elemental Types', ['Fire Elemental', 'Water Elemental', 'Earth Elemental', 'Air Elemental', 'Void Elemental'], '#26A69A'],
-        ['construct', '🤖 Construct', '🤖 Construct Types', ['Clockwork', 'Guardian', 'Automaton', 'War Machine', 'Sentinel'], '#78909C'],
-        ['witch', '🧿 Witch', '🧿 Witch Archetypes', ['Hedge Witch', 'Storm Witch', 'Potion Witch', 'Hex Witch', 'Seer'], '#6A1B9A'],
-        ['jinn', '🪔 Jinn', '🪔 Jinn Types', ['Wish Granter', 'Fire Jinn', 'Wind Jinn', 'Trickster Jinn', 'Ancient Jinn'], '#FF8F00'],
-        ['dragonborn', '🐲 Dragonborn', '🐲 Dragonborn Archetypes', ['Drake Knight', 'Breath Weapon Adept', 'Scale Guardian', 'Dragon Scholar', 'Wyrm Champion'], '#C62828']
+        ['human', '👨 Human', '👨 Human Archetypes', ['Mage', 'Gladiator', 'Archer', 'Rogue', 'Paladin'], '#6B3A2A'],
+        ['dragon', '🐉 Dragon', '🐉 Dragon Types', ['Fire Dragon', 'Ice Dragon', 'Lightning Dragon', 'Shadow Dragon', 'Gold Dragon'], '#7B1818'],
+        ['angel', '😇 Angel', '😇 Angel Types', ['Holy Angel', 'Guardian Angel', 'Messenger Angel', 'Fallen Angel', 'Warrior Angel'], '#8B6914'],
+        ['demon', '😈 Demon', '😈 Demon Types', ['Imp', 'Succubus', 'Overlord', 'Corrupted', 'Trickster'], '#4A1040'],
+        ['golem', '🔨 Golem', '🔨 Golem Materials', ['Steel Golem', 'Gold Golem', 'Silver Golem', 'Stone Golem', 'Clay Golem'], '#3D3D3D'],
+        ['elf', '🧝 Elf', '🧝 Elf Types', ['High Elf', 'Dark Elf', 'Wood Elf', 'Sea Elf', 'Twilight Elf'], '#1A5C2A'],
+        ['dwarf', '⛏️ Dwarf', '⛏️ Dwarf Types', ['Blacksmith Dwarf', 'Miner Dwarf', 'Berserker Dwarf', 'Mountain Dwarf', 'Rune Dwarf'], '#7A3800'],
+        ['orc', '👹 Orc', '👹 Orc Clans', ['War Chief', 'Berserker', 'Shaman', 'Raider', 'Beast Rider'], '#2E5C1A'],
+        ['goblin', '👺 Goblin', '👺 Goblin Types', ['Cave Goblin', 'Hobgoblin', 'Goblin Tinkerer', 'Goblin Rogue', 'Goblin King'], '#3A5C10'],
+        ['troll', '🧌 Troll', '🧌 Troll Types', ['Mountain Troll', 'River Troll', 'Forest Troll', 'Ice Troll', 'Bridge Troll'], '#2C3E4A'],
+        ['undead', '💀 Undead', '💀 Undead Types', ['Skeleton', 'Zombie', 'Wraith', 'Vampire', 'Lich'], '#1C2A2E'],
+        ['halfling', '🧑‍🌾 Halfling', '🧑‍🌾 Halfling Archetypes', ['Burglar', 'Innkeeper', 'Farmer', 'Storyteller', 'Lucky Wanderer'], '#5C3A2A'],
+        ['gnome', '🧙 Gnome', '🧙 Gnome Types', ['Inventor', 'Illusionist', 'Alchemist', 'Clockmaker', 'Garden Gnome'], '#0A4A5A'],
+        ['fae', '🧚 Fae', '🧚 Fae Types', ['Pixie', 'Dryad', 'Sprite', 'Satyr', 'Fairy Queen'], '#7A1040'],
+        ['merfolk', '🧜 Merfolk', '🧜 Merfolk Types', ['Tide Caller', 'Pearl Diver', 'Siren', 'Reef Guardian', 'Sea King'], '#0A2E6B'],
+        ['giant', '🗻 Giant', '🗻 Giant Types', ['Storm Giant', 'Fire Giant', 'Frost Giant', 'Stone Giant', 'Cloud Giant'], '#4A2A1A'],
+        ['beastfolk', '🐾 Beastfolk', '🐾 Beastfolk Archetypes', ['Wolf Warrior', 'Cat Scout', 'Bear Guardian', 'Fox Trickster', 'Raven Seer'], '#4A2E24'],
+        ['elemental', '🌪️ Elemental', '🌪️ Elemental Types', ['Fire Elemental', 'Water Elemental', 'Earth Elemental', 'Air Elemental', 'Void Elemental'], '#0A4A44'],
+        ['construct', '🤖 Construct', '🤖 Construct Types', ['Clockwork', 'Guardian', 'Automaton', 'War Machine', 'Sentinel'], '#2A3A42'],
+        ['witch', '🧿 Witch', '🧿 Witch Archetypes', ['Hedge Witch', 'Storm Witch', 'Potion Witch', 'Hex Witch', 'Seer'], '#3A0A5A'],
+        ['jinn', '🪔 Jinn', '🪔 Jinn Types', ['Wish Granter', 'Fire Jinn', 'Wind Jinn', 'Trickster Jinn', 'Ancient Jinn'], '#7A4A00'],
+        ['dragonborn', '🐲 Dragonborn', '🐲 Dragonborn Archetypes', ['Drake Knight', 'Breath Weapon Adept', 'Scale Guardian', 'Dragon Scholar', 'Wyrm Champion'], '#6B0A0A']
     ];
-    const sliceColors = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F'];
+    const sliceColors = ['#4A1065', '#6B0A0A', '#7A4A00', '#1A2030', '#8B6914'];
+
+    // Map known legacy predefined colors to their dark-medieval replacements.
+    // Keys are lowercase hex strings; normalizeLegacyColor lowercases before lookup.
+    // Colors that users have customized (not in this map) are never touched.
+    const legacyColorMap = {
+        '#e8b8a0': '#6B3A2A', '#e74c3c': '#7B1818', '#f1c40f': '#8B6914',
+        '#8e44ad': '#4A1040', '#95a5a6': '#3D3D3D', '#27ae60': '#1A5C2A',
+        '#d35400': '#7A3800', '#5d8c3d': '#2E5C1A', '#7cb342': '#3A5C10',
+        '#607d8b': '#2C3E4A', '#455a64': '#1C2A2E', '#a1887f': '#5C3A2A',
+        '#00acc1': '#0A4A5A', '#ec407a': '#7A1040', '#2196f3': '#0A2E6B',
+        '#795548': '#4A2A1A', '#8d6e63': '#4A2E24', '#26a69a': '#0A4A44',
+        '#78909c': '#2A3A42', '#6a1b9a': '#3A0A5A', '#ff8f00': '#7A4A00',
+        '#c62828': '#6B0A0A',
+        '#9b59b6': '#4A1065', '#f39c12': '#7A4A00', '#2c3e50': '#1A2030',
+        '#2ecc71': '#1A5C2A', '#3498db': '#0A2E6B'
+    };
+
+    function normalizeLegacyColor(color) {
+        if (!color) return color;
+        return legacyColorMap[color.toLowerCase()] || color;
+    }
 
     function rebuildRaces() {
         if (!window.wheel) return;
@@ -45,7 +66,7 @@
                         id: oldSlice?.id || `${id}_${index}`,
                         name: oldSlice?.name || name,
                         probability: Number(oldSlice?.probability) > 0 ? Number(oldSlice.probability) : 20,
-                        color: oldSlice?.color || sliceColors[index],
+                        color: normalizeLegacyColor(oldSlice?.color) || sliceColors[index],
                         linkedWheelId: oldSlice?.linkedWheelId || null
                     };
                 })

@@ -15,7 +15,6 @@
         </div>
 
         <div class="main-content">
-            <!-- Wheel Section -->
             <div class="wheel-section">
                 <div class="canvas-container">
                     <canvas id="wheelCanvas" width="500" height="500"></canvas>
@@ -23,7 +22,6 @@
                 </div>
             </div>
 
-            <!-- Control Panel -->
             <div class="control-panel">
                 <div class="panel-section">
                     <h2>Slices</h2>
@@ -41,29 +39,23 @@
 
                 <div class="panel-section">
                     <h2>Result</h2>
-                    <div id="resultDisplay" class="result-display">
-                        <p>Spin to see result</p>
-                    </div>
+                    <div id="resultDisplay" class="result-display"><p>Spin to see result</p></div>
                 </div>
             </div>
         </div>
 
-        <!-- Flames Animation Container -->
         <div id="flamesContainer" class="flames-container"></div>
     </div>
 
-    <!-- Modal for linking wheels -->
     <div id="wheelModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Link Wheel to Slice: <span id="sliceNameModal"></span></h2>
-            
             <div class="modal-section">
                 <h3>Create New Wheel or Select Existing</h3>
                 <input type="text" id="newWheelName" placeholder="New wheel name (or leave blank to select)" class="input">
                 <button id="createWheelBtn" class="btn btn-success">Create New Wheel</button>
             </div>
-
             <div class="modal-section">
                 <h3>Or Select Existing Wheel</h3>
                 <div id="wheelsList" class="wheels-list"></div>
@@ -71,6 +63,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Version query forces GitHub Pages/browser caches to load the latest script. -->
+    <script src="script.js?v=20260716"></script>
 </body>
 </html>

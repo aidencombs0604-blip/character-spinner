@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -55,7 +54,7 @@
         <div id="flamesContainer" class="flames-container"></div>
     </div>
 
-    <!-- ⭐ Medieval Modal (fixed) -->
+    <!-- Medieval Modal -->
     <div id="wheelModal" class="modal">
         <div class="modal-content medieval-modal">
             <span class="close">&times;</span>
@@ -92,6 +91,7 @@
 
     <script src="data-repair.js?v=20260716-options-fix"></script>
     <script src="linked-editor.js?v=20260716-options-fix"></script>
+    <script src="pointer.js?v=20260716-options-fix"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -99,6 +99,7 @@
             const editPanel = document.getElementById('editPanel');
             const spinTab = document.getElementById('spinTab');
             const editTab = document.getElementById('editTab');
+
             const showPanel = editing => {
                 spinnerPanel.hidden = editing;
                 editPanel.hidden = !editing;
@@ -107,6 +108,7 @@
                 spinTab.setAttribute('aria-selected', String(!editing));
                 editTab.setAttribute('aria-selected', String(editing));
             };
+
             spinTab.addEventListener('click', () => showPanel(false));
             editTab.addEventListener('click', () => showPanel(true));
         });

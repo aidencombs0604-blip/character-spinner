@@ -50,7 +50,6 @@
                     </div>
                 </div>
 
-                <!-- Compatibility elements required by script.js. -->
                 <div hidden aria-hidden="true">
                     <div id="slicesList"></div>
                     <button id="addSliceBtn" type="button">Add slice</button>
@@ -81,9 +80,16 @@
         </div>
     </div>
 
-    <script src="script.js?v=20260716-reset"></script>
-    <script src="data-repair.js?v=20260716-reset"></script>
-    <script src="linked-editor.js?v=20260716-reset"></script>
+    <script src="script.js?v=20260716-options-fix"></script>
+    <script>
+        // script.js declares a global lexical `wheel`, so expose it on window
+        // for the repair and editor modules loaded below.
+        document.addEventListener('DOMContentLoaded', () => {
+            window.wheel = wheel;
+        });
+    </script>
+    <script src="data-repair.js?v=20260716-options-fix"></script>
+    <script src="linked-editor.js?v=20260716-options-fix"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const spinnerPanel = document.getElementById('spinnerPanel');

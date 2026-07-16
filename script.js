@@ -134,7 +134,7 @@ class Wheel {
             this.ctx.save(); this.ctx.translate(cx + Math.cos(textAngle) * radius * .65, cy + Math.sin(textAngle) * radius * .65); this.ctx.rotate(textAngle);
             this.ctx.shadowColor = 'rgba(0,0,0,0.85)'; this.ctx.shadowBlur = 5;
             this.ctx.fillStyle = '#f5f1e8'; this.ctx.font = 'bold 13px Georgia, serif'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle'; this.ctx.fillText(slice.name, 0, 0);
-            this.ctx.shadowBlur = 0; this.ctx.restore();
+            this.ctx.restore(); // restores shadow, transform, and other context state
             angle += size;
         });
         this.ctx.beginPath(); this.ctx.arc(cx, cy, radius, 0, Math.PI * 2); this.ctx.strokeStyle = '#8d6d38'; this.ctx.lineWidth = 3; this.ctx.stroke();

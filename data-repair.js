@@ -51,7 +51,7 @@
                     // Keep user-modified color; replace old default with new medieval color
                     const color = (oldSlice?.color && !oldSliceColors.has(existingColor))
                         ? oldSlice.color
-                        : sliceColors[index];
+                        : sliceColors[index % sliceColors.length];
                     return {
                         id: oldSlice?.id || `${id}_${index}`,
                         name: oldSlice?.name || name,

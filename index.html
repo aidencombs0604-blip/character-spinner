@@ -64,7 +64,7 @@
         <div id="flamesContainer" class="flames-container"></div>
     </div>
 
-    <!-- ⭐ Medieval Fantasy Link Modal (patched) -->
+    <!-- ⭐ Medieval Fantasy Link Modal (patched & fixed) -->
     <div id="wheelModal" class="modal">
         <div class="modal-content medieval-modal">
             <span class="close">&times;</span>
@@ -89,14 +89,21 @@
         </div>
     </div>
 
+    <!-- ⭐ Scripts (order matters!) -->
     <script src="script.js?v=20260716-options-fix"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            window.wheel = wheel;
+            // Prevent crash if script.js fails
+            if (typeof wheel !== "undefined") {
+                window.wheel = wheel;
+            }
         });
     </script>
+
     <script src="data-repair.js?v=20260716-options-fix"></script>
     <script src="linked-editor.js?v=20260716-options-fix"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const spinnerPanel = document.getElementById('spinnerPanel');

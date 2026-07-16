@@ -42,7 +42,7 @@
                 <div id="editPanel" class="edit-panel" role="tabpanel" hidden>
                     <div class="panel-section linked-editor-section">
                         <h2>Wheel Editor</h2>
-                        <p class="editor-help">Choose the main race wheel or any individual linked wheel. Add, edit, delete, and connect slices at every level.</p>
+                        <p class="editor-help">Select the main race wheel or any linked wheel. Edit, add, delete, and connect slices at every level.</p>
                         <label for="linkedWheelSelect">Wheel to edit</label>
                         <select id="linkedWheelSelect" class="input"></select>
                         <div id="selectedWheelEditor" class="selected-wheel-editor"></div>
@@ -72,6 +72,7 @@
     </div>
 
     <script src="script.js?v=20260716"></script>
+    <script src="data-repair.js?v=20260716"></script>
     <script src="linked-editor.js?v=20260716"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -79,14 +80,16 @@
             const editPanel = document.getElementById('editPanel');
             const spinTab = document.getElementById('spinTab');
             const editTab = document.getElementById('editTab');
-            const showPanel = editing => {
+
+            function showPanel(editing) {
                 spinnerPanel.hidden = editing;
                 editPanel.hidden = !editing;
                 spinTab.classList.toggle('active', !editing);
                 editTab.classList.toggle('active', editing);
                 spinTab.setAttribute('aria-selected', String(!editing));
                 editTab.setAttribute('aria-selected', String(editing));
-            };
+            }
+
             spinTab.addEventListener('click', () => showPanel(false));
             editTab.addEventListener('click', () => showPanel(true));
         });

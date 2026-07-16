@@ -11,12 +11,14 @@ class Wheel {
         this.canvas = document.getElementById('wheelCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.spinBtn = document.getElementById('spinBtn');
-        this.slicesListDiv = document.getElementById('slicesList');
         this.resultDisplay = document.getElementById('resultDisplay');
         this.backBtn = document.getElementById('backBtn');
         this.wheelTitle = document.getElementById('wheelTitle');
         this.modal = document.getElementById('wheelModal');
         this.selectedSliceForLink = null;
+
+        // This was crashing before; now guarded.
+        this.slicesListDiv = document.getElementById('slicesList') || null;
 
         this.initializeEventListeners();
         this.loadFromStorage();
@@ -30,23 +32,16 @@ class Wheel {
     initializeEventListeners() {
         this.spinBtn.addEventListener('click', () => this.spin());
 
-        document.getElementById('addSliceBtn')?.addEventListener('click', () => this.toggleAddForm());
-        document.getElementById('createSliceBtn')?.addEventListener('click', () => this.createSlice());
         this.backBtn.addEventListener('click', () => this.goBack());
 
-        // SAFE CLOSE BUTTON
         const closeBtn = document.querySelector('.close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => this.closeModal());
         }
 
-        document.getElementById('createWheelBtn')?.addEventListener('click', () => this.createNewWheel());
-
-        const sliceNameInput = document.getElementById('sliceName');
-        if (sliceNameInput) {
-            sliceNameInput.addEventListener('keypress', e => {
-                if (e.key === 'Enter') this.createSlice();
-            });
+        const createWheelBtn = document.getElementById('createWheelBtn');
+        if (createWheelBtn) {
+            createWheelBtn.addEventListener('click', () => this.createNewWheel());
         }
     }
 
@@ -130,35 +125,38 @@ class Wheel {
     }
 
     updateUI() {
-        this.slicesListDiv.innerHTML = this.slices.map(slice => {
-            const linked = slice.linkedWheelId && this.wheels[slice.linkedWheelId];
+        // Guard against missing slicesListDiv so we don't crash.
+        if (this.slicesListDiv) {
+            this.slicesListDiv.innerHTML = this.slices.map(slice => {
+                const linked = slice.linkedWheelId && this.wheels[slice.linkedWheelId];
 
-            return `
-                <div class="slice-item">
-                    <div class="slice-color" style="background-color:${slice.color}"></div>
+                return `
+                    <div class="slice-item">
+                        <div class="slice-color" style="background-color:${slice.color}"></div>
 
-                    <div class="slice-info">
-                        <div class="slice-name">${slice.name}</div>
-                        <div class="slice-probability">${slice.probability}%</div>
-                        ${linked ? `<div class="slice-linked">→ ${linked.name}</div>` : ''}
+                        <div class="slice-info">
+                            <div class="slice-name">${slice.name}</div>
+                            <div class="slice-probability">${slice.probability}%</div>
+                            ${linked ? `<div class="slice-linked">→ ${linked.name}</div>` : ''}
+                        </div>
+
+                        <div class="slice-actions">
+                            <select class="input slice-link-select"
+                                    onchange="wheel.setSliceLinkFromMain('${slice.id}', this.value)">
+                                <option value="">No linked wheel</option>
+                                ${Object.keys(this.wheels).map(id =>
+                                    `<option value="${id}" ${slice.linkedWheelId === id ? 'selected' : ''}>
+                                        ${this.wheels[id].name}
+                                    </option>`
+                                ).join('')}
+                            </select>
+
+                            <button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button>
+                        </div>
                     </div>
-
-                    <div class="slice-actions">
-                        <select class="input slice-link-select"
-                                onchange="wheel.setSliceLinkFromMain('${slice.id}', this.value)">
-                            <option value="">No linked wheel</option>
-                            ${Object.keys(this.wheels).map(id =>
-                                `<option value="${id}" ${slice.linkedWheelId === id ? 'selected' : ''}>
-                                    ${this.wheels[id].name}
-                                </option>`
-                            ).join('')}
-                        </select>
-
-                        <button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
 
         this.backBtn.style.display = this.wheelHistory.length ? 'block' : 'none';
     }
@@ -364,37 +362,6 @@ class Wheel {
         this.saveToStorage();
     }
 
-    addSlice(name, probability, color) {
-        this.slices.push({
-            id: `slice_${Date.now()}`,
-            name,
-            probability,
-            color,
-            linkedWheelId: null
-        });
-
-        this.updateUI();
-        this.saveToStorage();
-        this.draw();
-    }
-
-    createSlice() {
-        const name = document.getElementById('sliceName').value.trim();
-        const probability = parseInt(document.getElementById('sliceProbability').value, 10);
-        const color = document.getElementById('sliceColor').value;
-
-        if (!name || !probability || probability < 1 || probability > 100) {
-            return alert('Please enter a valid name and probability (1-100)');
-        }
-
-        this.addSlice(name, probability, color);
-
-        document.getElementById('sliceName').value = '';
-        document.getElementById('sliceProbability').value = '';
-
-        this.toggleAddForm();
-    }
-
     deleteSlice(id) {
         this.slices = this.slices.filter(slice => slice.id !== id);
 
@@ -414,14 +381,81 @@ class Wheel {
         this.draw();
     }
 
-    toggleAddForm() {
-        const form = document.querySelector('.panel-section:nth-child(2)');
-        if (form) {
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    closeModal() {
+        if (this.modal) {
+            this.modal.classList.remove('show');
         }
     }
 
-    linkSliceToWheel(id) {
-        this.selectedSliceForLink = id;
+    createNewWheel() {
+        const nameInput = document.getElementById('newWheelName');
+        const name = nameInput.value.trim();
+        if (!name) return;
 
-        const slice = this.slices.find(s
+        const id = `wheel_${Date.now()}`;
+        this.wheels[id] = {
+            id,
+            name,
+            slices: []
+        };
+
+        if (this.selectedSliceForLink) {
+            const slice = this.slices.find(s => s.id === this.selectedSliceForLink);
+            if (slice) slice.linkedWheelId = id;
+        }
+
+        nameInput.value = '';
+        this.closeModal();
+        this.saveToStorage();
+        this.updateUI();
+    }
+
+    loadFromStorage() {
+        try {
+            const raw = localStorage.getItem('characterSpinnerData');
+            if (!raw) return;
+
+            const data = JSON.parse(raw);
+
+            this.slices = Array.isArray(data.slices) ? data.slices : [];
+            this.wheels = typeof data.wheels === 'object' && data.wheels ? data.wheels : {};
+            this.currentWheelId = data.currentWheelId || 'main';
+            this.wheelHistory = Array.isArray(data.wheelHistory) ? data.wheelHistory : [];
+            this.currentRotation = Number.isFinite(data.currentRotation) ? data.currentRotation : 0;
+        } catch {
+            // Ignore corrupted storage; we'll rebuild via data-repair.js
+        }
+    }
+
+    saveToStorage() {
+        try {
+            const data = {
+                slices: this.slices,
+                wheels: this.wheels,
+                currentWheelId: this.currentWheelId,
+                wheelHistory: this.wheelHistory,
+                currentRotation: this.currentRotation
+            };
+            localStorage.setItem('characterSpinnerData', JSON.stringify(data));
+        } catch {
+            // Storage failures shouldn't break the app.
+        }
+    }
+
+    playFlamesAnimation() {
+        const container = document.getElementById('flamesContainer');
+        if (!container) return;
+
+        container.innerHTML = '';
+        container.classList.add('active');
+
+        setTimeout(() => {
+            container.classList.remove('active');
+            container.innerHTML = '';
+        }, 1500);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    window.wheel = new Wheel();
+});

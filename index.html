@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Character Spinner</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260716">
 </head>
 <body>
     <div class="container">
@@ -16,6 +16,13 @@
 
         <div class="main-content">
             <div class="wheel-section">
+                <div class="result-above-wheel panel-section">
+                    <h2>Result</h2>
+                    <div id="resultDisplay" class="result-display">
+                        <p>Spin to see result</p>
+                    </div>
+                </div>
+
                 <div class="canvas-container">
                     <canvas id="wheelCanvas" width="500" height="500"></canvas>
                     <button id="spinBtn" class="spin-button">SPIN</button>
@@ -23,23 +30,40 @@
             </div>
 
             <div class="control-panel">
-                <div class="panel-section">
-                    <h2>Slices</h2>
-                    <div id="slicesList" class="slices-list"></div>
-                    <button id="addSliceBtn" class="btn btn-primary">+ Add Slice</button>
+                <div class="editor-tabs" role="tablist" aria-label="Spinner controls">
+                    <button id="spinTab" class="editor-tab active" type="button" role="tab" aria-selected="true">Spinner</button>
+                    <button id="editTab" class="editor-tab" type="button" role="tab" aria-selected="false">Edit</button>
                 </div>
 
-                <div class="panel-section">
-                    <h2>Add New Slice</h2>
-                    <input type="text" id="sliceName" placeholder="Slice name" class="input">
-                    <input type="number" id="sliceProbability" placeholder="Probability (1-100)" min="1" max="100" class="input">
-                    <input type="color" id="sliceColor" value="#FF6B6B" class="input">
-                    <button id="createSliceBtn" class="btn btn-success">Create</button>
+                <div id="spinnerPanel" class="spinner-panel" role="tabpanel">
+                    <div class="panel-section spinner-help">
+                        <h2>Ready to spin?</h2>
+                        <p>Spin the wheel to choose a race. Use the <strong>Edit</strong> tab to manage slices, probabilities, and linked wheels.</p>
+                    </div>
                 </div>
 
-                <div class="panel-section">
-                    <h2>Result</h2>
-                    <div id="resultDisplay" class="result-display"><p>Spin to see result</p></div>
+                <div id="editPanel" class="edit-panel" role="tabpanel" hidden>
+                    <div class="panel-section">
+                        <h2>Main Wheel Slices</h2>
+                        <div id="slicesList" class="slices-list"></div>
+                        <button id="addSliceBtn" class="btn btn-primary">+ Add Slice</button>
+                    </div>
+
+                    <div class="panel-section add-slice-section">
+                        <h2>Add New Slice</h2>
+                        <input type="text" id="sliceName" placeholder="Slice name" class="input">
+                        <input type="number" id="sliceProbability" placeholder="Probability (1-100)" min="1" max="100" class="input">
+                        <input type="color" id="sliceColor" value="#FF6B6B" class="input">
+                        <button id="createSliceBtn" class="btn btn-success">Create</button>
+                    </div>
+
+                    <div id="linkedEditorSection" class="panel-section linked-editor-section">
+                        <h2>Linked Wheel Slices</h2>
+                        <p class="editor-help">Choose a linked wheel to edit its slice names, probabilities, colors, and options.</p>
+                        <label for="linkedWheelSelect">Linked wheel</label>
+                        <select id="linkedWheelSelect" class="input"></select>
+                        <div id="linkedSlicesEditor" class="linked-slices-editor"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,7 +87,27 @@
         </div>
     </div>
 
-    <!-- Version query forces GitHub Pages/browser caches to load the latest script. -->
     <script src="script.js?v=20260716"></script>
+    <script src="linked-editor.js?v=20260716"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const spinnerPanel = document.getElementById('spinnerPanel');
+            const editPanel = document.getElementById('editPanel');
+            const spinTab = document.getElementById('spinTab');
+            const editTab = document.getElementById('editTab');
+
+            function showPanel(editing) {
+                spinnerPanel.hidden = editing;
+                editPanel.hidden = !editing;
+                spinTab.classList.toggle('active', !editing);
+                editTab.classList.toggle('active', editing);
+                spinTab.setAttribute('aria-selected', String(!editing));
+                editTab.setAttribute('aria-selected', String(editing));
+            }
+
+            spinTab.addEventListener('click', () => showPanel(false));
+            editTab.addEventListener('click', () => showPanel(true));
+        });
+    </script>
 </body>
 </html>

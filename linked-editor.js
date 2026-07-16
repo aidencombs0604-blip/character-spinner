@@ -1,6 +1,6 @@
 // Hierarchical wheel editor for the main race wheel and every linked wheel.
 (function () {
-    const palette = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F', '#2ECC71', '#3498DB'];
+    const palette = ['#6B2737', '#4A5568', '#2D5016', '#7D6529', '#5A4030', '#1E4D4D', '#3D1A5C'];
 
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>'"]/g, character => ({
@@ -16,13 +16,13 @@
         const app = getApp();
         if (!app) return null;
         return id === 'main'
-            ? { id: 'main', name: '🎡 Main Race Wheel', slices: app.slices }
+            ? { id: 'main', name: 'Main Race Wheel', slices: app.slices }
             : app.wheels?.[id] || null;
     }
 
     function wheelLabel(id) {
         const wheel = getWheel(id);
-        return id === 'main' ? '🎡 Main Race Wheel' : (wheel?.name || id);
+        return id === 'main' ? 'Main Race Wheel' : (wheel?.name || id);
     }
 
     function getAllWheelIds() {
@@ -44,7 +44,7 @@
         const ids = getAllWheelIds();
         select.innerHTML = ids.length
             ? ids.map(id => `<option value="${escapeHtml(id)}">${escapeHtml(wheelLabel(id))}</option>`).join('')
-            : '<option value="main">🎡 Main Race Wheel</option>';
+            : '<option value="main">Main Race Wheel</option>';
         select.value = ids.includes(selectedId) ? selectedId : 'main';
         renderSelectedWheel();
     }
@@ -68,7 +68,7 @@
                 <div class="editor-grid">
                     <input id="newLinkedName" class="input" type="text" placeholder="Slice name">
                     <input id="newLinkedProbability" class="input" type="number" min="1" max="100" value="20" placeholder="Probability">
-                    <input id="newLinkedColor" class="linked-color" type="color" value="#667eea" aria-label="Slice color">
+                    <input id="newLinkedColor" class="linked-color" type="color" value="#6B2737" aria-label="Slice color">
                     <button id="addLinkedSlice" class="btn btn-primary" type="button">Add slice</button>
                 </div>
             </div>`;
@@ -109,7 +109,7 @@
                 .filter(id => id !== currentWheelId)
                 .map(id => `<option value="${escapeHtml(id)}" ${slice.linkedWheelId === id ? 'selected' : ''}>${escapeHtml(wheelLabel(id))}</option>`));
 
-        const color = /^#[0-9a-f]{6}$/i.test(slice.color) ? slice.color : '#667eea';
+        const color = /^#[0-9a-f]{6}$/i.test(slice.color) ? slice.color : '#6B2737';
         return `
             <div class="linked-slice-editor" data-slice-index="${index}">
                 <input class="input editor-slice-name" type="text" value="${escapeHtml(slice.name)}" aria-label="Slice name">

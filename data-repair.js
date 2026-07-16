@@ -27,6 +27,7 @@
     const sliceColors = ['#4A1065', '#6B0A0A', '#7A4A00', '#1A2030', '#8B6914'];
 
     // Map known legacy predefined colors to their dark-medieval replacements.
+    // Keys are lowercase hex strings; normalizeLegacyColor lowercases before lookup.
     // Colors that users have customized (not in this map) are never touched.
     const legacyColorMap = {
         '#e8b8a0': '#6B3A2A', '#e74c3c': '#7B1818', '#f1c40f': '#8B6914',
@@ -42,7 +43,7 @@
     };
 
     function normalizeLegacyColor(color) {
-        if (!color) return null;
+        if (!color) return color;
         return legacyColorMap[color.toLowerCase()] || color;
     }
 

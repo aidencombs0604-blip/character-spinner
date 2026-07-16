@@ -1,240 +1,241 @@
-// Character Spinner
-class Wheel {
-    constructor() {
-        this.slices = [];
-        this.wheels = {};
-        this.currentWheelId = 'main';
-        this.wheelHistory = [];
-        this.currentRotation = 0;
-        this.isSpinning = false;
-        this.pendingWinner = null;
-        this.canvas = document.getElementById('wheelCanvas');
-        this.ctx = this.canvas.getContext('2d');
-        this.spinBtn = document.getElementById('spinBtn');
-        this.slicesListDiv = document.getElementById('slicesList');
-        this.resultDisplay = document.getElementById('resultDisplay');
-        this.backBtn = document.getElementById('backBtn');
-        this.wheelTitle = document.getElementById('wheelTitle');
-        this.modal = document.getElementById('wheelModal');
-        this.selectedSliceForLink = null;
+// Hierarchical wheel editor for the main race wheel and every linked wheel.
+(function () {
+    const palette = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F', '#2ECC71', '#3498DB'];
 
-        this.initializeEventListeners();
-        this.loadFromStorage();
-        this.createPredefinedWheels();
-        this.addDefaultSlices();
-        this.updateUI();
-        this.draw();
-        this.saveToStorage();
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[character]));
     }
 
-    initializeEventListeners() {
-        this.spinBtn.addEventListener('click', () => this.spin());
-        document.getElementById('addSliceBtn').addEventListener('click', () => this.toggleAddForm());
-        document.getElementById('createSliceBtn').addEventListener('click', () => this.createSlice());
-        this.backBtn.addEventListener('click', () => this.goBack());
-        document.querySelector('.close').addEventListener('click', () => this.closeModal());
-        document.getElementById('createWheelBtn').addEventListener('click', () => this.createNewWheel());
-        document.getElementById('sliceName').addEventListener('keypress', e => {
-            if (e.key === 'Enter') this.createSlice();
-        });
+    function getApp() {
+        return window.wheel;
     }
 
-    createPredefinedWheels() {
-        const definitions = [
-            ['human', '👨 Human Archetypes', ['Mage', 'Gladiator', 'Archer', 'Rogue', 'Paladin']],
-            ['dragon', '🐉 Dragon Types', ['Fire Dragon', 'Ice Dragon', 'Lightning Dragon', 'Shadow Dragon', 'Gold Dragon']],
-            ['angel', '😇 Angel Types', ['Holy Angel', 'Guardian Angel', 'Messenger Angel', 'Fallen Angel', 'Warrior Angel']],
-            ['demon', '😈 Demon Types', ['Imp', 'Succubus', 'Overlord', 'Corrupted', 'Trickster']],
-            ['golem', '🔨 Golem Materials', ['Steel Golem', 'Gold Golem', 'Silver Golem', 'Stone Golem', 'Clay Golem']],
-            ['elf', '🧝 Elf Types', ['High Elf', 'Dark Elf', 'Wood Elf', 'Sea Elf', 'Twilight Elf']],
-            ['dwarf', '⛏️ Dwarf Types', ['Blacksmith Dwarf', 'Miner Dwarf', 'Berserker Dwarf', 'Mountain Dwarf', 'Rune Dwarf']],
-            ['orc', '👹 Orc Clans', ['War Chief', 'Berserker', 'Shaman', 'Raider', 'Beast Rider']],
-            ['goblin', '👺 Goblin Types', ['Cave Goblin', 'Hobgoblin', 'Goblin Tinkerer', 'Goblin Rogue', 'Goblin King']],
-            ['troll', '🧌 Troll Types', ['Mountain Troll', 'River Troll', 'Forest Troll', 'Ice Troll', 'Bridge Troll']],
-            ['undead', '💀 Undead Types', ['Skeleton', 'Zombie', 'Wraith', 'Vampire', 'Lich']],
-            ['halfling', '🧑‍🌾 Halfling Archetypes', ['Burglar', 'Innkeeper', 'Farmer', 'Storyteller', 'Lucky Wanderer']],
-            ['gnome', '🧙 Gnome Types', ['Inventor', 'Illusionist', 'Alchemist', 'Clockmaker', 'Garden Gnome']],
-            ['fae', '🧚 Fae Types', ['Pixie', 'Dryad', 'Sprite', 'Satyr', 'Fairy Queen']],
-            ['merfolk', '🧜 Merfolk Types', ['Tide Caller', 'Pearl Diver', 'Siren', 'Reef Guardian', 'Sea King']],
-            ['giant', '🗻 Giant Types', ['Storm Giant', 'Fire Giant', 'Frost Giant', 'Stone Giant', 'Cloud Giant']],
-            ['beastfolk', '🐾 Beastfolk Archetypes', ['Wolf Warrior', 'Cat Scout', 'Bear Guardian', 'Fox Trickster', 'Raven Seer']],
-            ['elemental', '🌪️ Elemental Types', ['Fire Elemental', 'Water Elemental', 'Earth Elemental', 'Air Elemental', 'Void Elemental']],
-            ['construct', '🤖 Construct Types', ['Clockwork', 'Guardian', 'Automaton', 'War Machine', 'Sentinel']],
-            ['witch', '🧿 Witch Archetypes', ['Hedge Witch', 'Storm Witch', 'Potion Witch', 'Hex Witch', 'Seer']],
-            ['jinn', '🪔 Jinn Types', ['Wish Granter', 'Fire Jinn', 'Wind Jinn', 'Trickster Jinn', 'Ancient Jinn']],
-            ['dragonborn', '🐲 Dragonborn Archetypes', ['Drake Knight', 'Breath Weapon Adept', 'Scale Guardian', 'Dragon Scholar', 'Wyrm Champion']]
-        ];
-        const colors = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F'];
-        definitions.forEach(([id, name, names]) => {
-            const wheelId = `wheel_${id}`;
-            if (this.wheels[wheelId]) return;
-            this.wheels[wheelId] = {
-                id: wheelId,
-                name,
-                slices: names.map((sliceName, i) => ({
-                    id: `${id}_${i}`,
-                    name: sliceName,
-                    probability: 20,
-                    color: colors[i],
-                    linkedWheelId: null
-                }))
-            };
-        });
+    function getWheel(id) {
+        const app = getApp();
+        if (!app) return null;
+        return id === 'main'
+            ? { id: 'main', name: '🎡 Main Race Wheel', slices: app.slices }
+            : app.wheels?.[id] || null;
     }
 
-    addDefaultSlices() {
-        const races = [
-            ['👨 Human', 'human', '#E8B8A0'], ['🐉 Dragon', 'dragon', '#E74C3C'],
-            ['😇 Angel', 'angel', '#F1C40F'], ['😈 Demon', 'demon', '#8E44AD'],
-            ['🔨 Golem', 'golem', '#95A5A6'], ['🧝 Elf', 'elf', '#27AE60'],
-            ['⛏️ Dwarf', 'dwarf', '#D35400'], ['👹 Orc', 'orc', '#5D8C3D'],
-            ['👺 Goblin', 'goblin', '#7CB342'], ['🧌 Troll', 'troll', '#607D8B'],
-            ['💀 Undead', 'undead', '#455A64'], ['🧑‍🌾 Halfling', 'halfling', '#A1887F'],
-            ['🧙 Gnome', 'gnome', '#00ACC1'], ['🧚 Fae', 'fae', '#EC407A'],
-            ['🧜 Merfolk', 'merfolk', '#2196F3'], ['🗻 Giant', 'giant', '#795548'],
-            ['🐾 Beastfolk', 'beastfolk', '#8D6E63'], ['🌪️ Elemental', 'elemental', '#26A69A'],
-            ['🤖 Construct', 'construct', '#78909C'], ['🧿 Witch', 'witch', '#6A1B9A'],
-            ['🪔 Jinn', 'jinn', '#FF8F00'], ['🐲 Dragonborn', 'dragonborn', '#C62828']
-        ];
-        const oldIds = new Set(this.slices.map(slice => slice.raceId || slice.linkedWheelId));
-        const now = Date.now();
-        races.forEach(([name, id, color], index) => {
-            const wheelId = `wheel_${id}`;
-            if (oldIds.has(wheelId)) return;
-            this.slices.push({
-                id: `slice_${now}_${index}`,
-                raceId: id,
-                name,
-                probability: id === 'dwarf' ? 2 : 5,
-                color,
-                linkedWheelId: wheelId
-            });
-        });
+    function wheelLabel(id) {
+        const wheel = getWheel(id);
+        return id === 'main' ? '🎡 Main Race Wheel' : (wheel?.name || id);
     }
 
-    // 🔥 NEW PATCHED VERSION — includes dropdown for linking existing wheels
-    updateUI() {
-        this.slicesListDiv.innerHTML = this.slices.map(slice => {
-            const linked = slice.linkedWheelId && this.wheels[slice.linkedWheelId];
+    function getAllWheelIds() {
+        const app = getApp();
+        return app ? ['main', ...Object.keys(app.wheels || {})] : [];
+    }
 
-            return `
-                <div class="slice-item">
-                    <div class="slice-color" style="background-color:${slice.color}"></div>
+    function saveChanges() {
+        const app = getApp();
+        if (!app) return;
+        app.saveToStorage();
+        app.updateUI();
+        app.draw();
+    }
 
-                    <div class="slice-info">
-                        <div class="slice-name">${slice.name}</div>
-                        <div class="slice-probability">${slice.probability}%</div>
-                        ${linked ? `<div class="slice-linked">→ ${linked.name}</div>` : ''}
-                    </div>
+    function renderWheelOptions(selectedId) {
+        const select = document.getElementById('linkedWheelSelect');
+        if (!select || !getApp()) return;
+        const ids = getAllWheelIds();
+        select.innerHTML = ids.length
+            ? ids.map(id => `<option value="${escapeHtml(id)}">${escapeHtml(wheelLabel(id))}</option>`).join('')
+            : '<option value="main">🎡 Main Race Wheel</option>';
+        select.value = ids.includes(selectedId) ? selectedId : 'main';
+        renderSelectedWheel();
+    }
 
-                    <div class="slice-actions">
+    function renderSelectedWheel() {
+        const select = document.getElementById('linkedWheelSelect');
+        const header = document.getElementById('selectedWheelEditor');
+        const editor = document.getElementById('linkedSlicesEditor');
+        const wheel = getWheel(select?.value || 'main');
+        if (!select || !header || !editor || !wheel) return;
 
-                        <!-- NEW: Link existing wheels dropdown -->
-                        <select class="input slice-link-select"
-                                onchange="wheel.setSliceLinkFromMain('${slice.id}', this.value)">
-                            <option value="">No linked wheel</option>
-                            ${Object.keys(this.wheels).map(id =>
-                                `<option value="${id}" ${slice.linkedWheelId === id ? 'selected' : ''}>
-                                    ${this.wheels[id].name}
-                                </option>`
-                            ).join('')}
-                        </select>
-
-                        <button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button>
-                    </div>
+        const id = select.value || 'main';
+        header.innerHTML = `
+            <div class="wheel-editor-heading">
+                <input id="selectedWheelName" class="input" type="text" value="${escapeHtml(wheel.name)}" aria-label="Wheel name">
+                <button id="saveWheelName" class="btn btn-success" type="button">Save wheel name</button>
+                ${id !== 'main' ? '<button id="deleteSelectedWheel" class="btn slice-delete" type="button">Delete this wheel</button>' : ''}
+            </div>
+            <div class="add-linked-slice">
+                <h3>Add a slice to ${escapeHtml(wheel.name)}</h3>
+                <div class="editor-grid">
+                    <input id="newLinkedName" class="input" type="text" placeholder="Slice name">
+                    <input id="newLinkedProbability" class="input" type="number" min="1" max="100" value="20" placeholder="Probability">
+                    <input id="newLinkedColor" class="linked-color" type="color" value="#667eea" aria-label="Slice color">
+                    <button id="addLinkedSlice" class="btn btn-primary" type="button">Add slice</button>
                 </div>
-            `;
-        }).join('');
+            </div>`;
 
-        this.backBtn.style.display = this.wheelHistory.length ? 'block' : 'none';
-    }
-
-    draw() {
-        const cx = this.canvas.width / 2, cy = this.canvas.height / 2, radius = Math.min(cx, cy) - 10;
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        const total = this.slices.reduce((sum, s) => sum + Number(s.probability), 0);
-        if (!total) return;
-        let angle = this.currentRotation;
-        this.slices.forEach(slice => {
-            const size = Number(slice.probability) / total * Math.PI * 2;
-            this.ctx.beginPath(); this.ctx.moveTo(cx, cy); this.ctx.arc(cx, cy, radius, angle, angle + size); this.ctx.closePath();
-            this.ctx.fillStyle = slice.color; this.ctx.fill(); this.ctx.strokeStyle = '#fff'; this.ctx.lineWidth = 2; this.ctx.stroke();
-            const textAngle = angle + size / 2;
-            this.ctx.save(); this.ctx.translate(cx + Math.cos(textAngle) * radius * .65, cy + Math.sin(textAngle) * radius * .65); this.ctx.rotate(textAngle);
-            this.ctx.fillStyle = '#fff'; this.ctx.font = 'bold 14px Arial'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle'; this.ctx.fillText(slice.name, 0, 0); this.ctx.restore();
-            angle += size;
+        header.querySelector('#saveWheelName').addEventListener('click', () => {
+            const name = header.querySelector('#selectedWheelName').value.trim();
+            if (!name) return;
+            if (id !== 'main') getApp().wheels[id].name = name;
+            saveChanges();
+            renderWheelOptions(id);
         });
-        this.ctx.beginPath(); this.ctx.arc(cx, cy, radius, 0, Math.PI * 2); this.ctx.strokeStyle = '#333'; this.ctx.lineWidth = 3; this.ctx.stroke();
-        this.ctx.fillStyle = '#ff6b6b'; this.ctx.beginPath(); this.ctx.moveTo(cx, 20); this.ctx.lineTo(cx - 15, 50); this.ctx.lineTo(cx + 15, 50); this.ctx.closePath(); this.ctx.fill();
+
+        const deleteButton = header.querySelector('#deleteSelectedWheel');
+        if (deleteButton) deleteButton.addEventListener('click', () => deleteWheel(id));
+        header.querySelector('#addLinkedSlice').addEventListener('click', () => addSlice(id));
+
+        editor.innerHTML = wheel.slices.length
+            ? wheel.slices.map((slice, index) => renderSlice(slice, index, id)).join('')
+            : '<p class="editor-empty">This wheel has no slices yet. Add one above.</p>';
+
+        editor.querySelectorAll('.save-editor-slice').forEach(button => {
+            button.addEventListener('click', () => saveSlice(id, button));
+        });
+        editor.querySelectorAll('.delete-editor-slice').forEach(button => {
+            button.addEventListener('click', () => deleteSlice(id, button));
+        });
+        editor.querySelectorAll('.slice-link-select').forEach(linkSelect => {
+            linkSelect.addEventListener('change', () => setSliceLink(id, linkSelect));
+        });
+        editor.querySelectorAll('.link-existing-button').forEach(button => {
+            button.addEventListener('click', () => openLinkModal(id, button));
+        });
     }
 
-    chooseWeightedSlice() {
-        const total = this.slices.reduce((sum, s) => sum + Number(s.probability), 0);
-        let value = Math.random() * total;
-        return this.slices.find(slice => (value -= Number(slice.probability)) < 0) || this.slices[this.slices.length - 1];
+    function renderSlice(slice, index, currentWheelId) {
+        const linkOptions = ['<option value="">No linked wheel</option>']
+            .concat(getAllWheelIds()
+                .filter(id => id !== currentWheelId)
+                .map(id => `<option value="${escapeHtml(id)}" ${slice.linkedWheelId === id ? 'selected' : ''}>${escapeHtml(wheelLabel(id))}</option>`));
+
+        const color = /^#[0-9a-f]{6}$/i.test(slice.color) ? slice.color : '#667eea';
+        return `
+            <div class="linked-slice-editor" data-slice-index="${index}">
+                <input class="input editor-slice-name" type="text" value="${escapeHtml(slice.name)}" aria-label="Slice name">
+                <div class="linked-slice-row">
+                    <label>Probability
+                        <input class="input editor-slice-probability" type="number" min="1" max="100" value="${Number(slice.probability) || 1}">
+                    </label>
+                    <label>Color
+                        <input class="linked-color editor-slice-color" type="color" value="${color}">
+                    </label>
+                </div>
+                <label>Next linked wheel
+                    <select class="input slice-link-select">${linkOptions.join('')}</select>
+                </label>
+                <div class="editor-actions">
+                    <button class="btn btn-success save-editor-slice" type="button">Save slice</button>
+                    <button class="btn slice-delete delete-editor-slice" type="button">Delete slice</button>
+
+                    <!-- NEW: unified Link button -->
+                    <button class="btn btn-primary link-existing-button" type="button">Link</button>
+                </div>
+                <span class="linked-save-status" aria-live="polite"></span>
+            </div>`;
     }
 
-    rotationForSlice(slice) {
-        const pointer = -Math.PI / 2, total = this.slices.reduce((sum, s) => sum + Number(s.probability), 0);
-        let start = 0;
-        for (const candidate of this.slices) {
-            const size = Number(candidate.probability) / total * Math.PI * 2;
-            if (candidate === slice) return pointer - (start + size / 2);
-            start += size;
+    function saveSlice(wheelId, button) {
+        const row = button.closest('.linked-slice-editor');
+        const slice = getWheel(wheelId)?.slices[Number(row.dataset.sliceIndex)];
+        const status = row.querySelector('.linked-save-status');
+        const name = row.querySelector('.editor-slice-name').value.trim();
+        const probability = Number(row.querySelector('.editor-slice-probability').value);
+        if (!slice || !name || !Number.isFinite(probability) || probability < 1 || probability > 100) {
+            status.textContent = 'Enter a name and probability from 1 to 100.';
+            status.className = 'linked-save-status error';
+            return;
         }
-        return this.currentRotation;
+        slice.name = name;
+        slice.probability = probability;
+        slice.color = row.querySelector('.editor-slice-color').value;
+        saveChanges();
+        status.textContent = 'Saved';
+        status.className = 'linked-save-status saved';
+        setTimeout(() => { status.textContent = ''; }, 1500);
     }
 
-    spin() {
-        if (this.isSpinning || !this.slices.length) return;
-        this.isSpinning = true; this.spinBtn.disabled = true; this.pendingWinner = this.chooseWeightedSlice();
-        const target = this.rotationForSlice(this.pendingWinner), current = this.currentRotation, fullTurns = 10 + Math.floor(Math.random() * 10), twoPi = Math.PI * 2;
-        const normalizedTarget = ((target % twoPi) + twoPi) % twoPi, normalizedCurrent = ((current % twoPi) + twoPi) % twoPi;
-        const end = current + fullTurns * twoPi + (normalizedTarget - normalizedCurrent + twoPi) % twoPi;
-        const startTime = performance.now(), duration = 3000 + Math.random() * 2000;
-        const animate = now => { const progress = Math.min((now - startTime) / duration, 1), eased = 1 - Math.pow(1 - progress, 3); this.currentRotation = current + (end - current) * eased; this.draw(); if (progress < 1) requestAnimationFrame(animate); else this.onSpinComplete(); };
-        requestAnimationFrame(animate);
+    function setSliceLink(wheelId, select) {
+        const row = select.closest('.linked-slice-editor');
+        const slice = getWheel(wheelId)?.slices[Number(row.dataset.sliceIndex)];
+        if (!slice) return;
+        slice.linkedWheelId = select.value || null;
+        saveChanges();
+        renderSelectedWheel();
     }
 
-    onSpinComplete() {
-        const winner = this.pendingWinner; this.playFlamesAnimation();
-        setTimeout(() => { if (winner && winner.linkedWheelId) this.transitionToWheel(winner.linkedWheelId, winner.name); else if (winner) this.showResult(winner); this.isSpinning = false; this.spinBtn.disabled = false; this.pendingWinner = null; }, 2000);
+    function addSlice(wheelId) {
+        const wheel = getWheel(wheelId);
+        const nameInput = document.getElementById('newLinkedName');
+        const probabilityInput = document.getElementById('newLinkedProbability');
+        const colorInput = document.getElementById('newLinkedColor');
+        const name = nameInput.value.trim();
+        const probability = Number(probabilityInput.value);
+        if (!wheel || !name || !Number.isFinite(probability) || probability < 1 || probability > 100) return;
+        wheel.slices.push({
+            id: `slice_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+            name,
+            probability,
+            color: colorInput.value || palette[wheel.slices.length % palette.length],
+            linkedWheelId: null
+        });
+        saveChanges();
+        renderSelectedWheel();
     }
 
-    showResult(slice) { this.resultDisplay.classList.add('winner'); this.resultDisplay.innerHTML = `<div style="text-align:center"><div style="font-size:2rem;margin-bottom:10px">🎯</div><div>You got: <strong>${slice.name}</strong></div></div>`; }
-
-    transitionToWheel(wheelId, raceName) {
-        this.wheelHistory.push({ wheelId: this.currentWheelId, slices: JSON.parse(JSON.stringify(this.slices)) });
-        this.currentWheelId = wheelId; const next = this.wheels[wheelId];
-        this.slices = JSON.parse(JSON.stringify(next.slices)); this.wheelTitle.textContent = next.name; this.showResult({ name: `You selected ${raceName}!` });
-        this.currentRotation = 0; this.updateUI(); this.draw();
+    function deleteSlice(wheelId, button) {
+        const wheel = getWheel(wheelId);
+        const row = button.closest('.linked-slice-editor');
+        if (!wheel || !row) return;
+        wheel.slices.splice(Number(row.dataset.sliceIndex), 1);
+        saveChanges();
+        renderSelectedWheel();
     }
 
-    goBack() {
-        if (!this.wheelHistory.length) return;
-        const previous = this.wheelHistory.pop(); this.currentWheelId = previous.wheelId; this.slices = previous.slices;
-        this.wheelTitle.textContent = this.currentWheelId === 'main' ? 'Main Wheel' : this.wheels[this.currentWheelId].name; this.currentRotation = 0; this.updateUI(); this.draw(); this.saveToStorage();
-    }
-
-    addSlice(name, probability, color) { this.slices.push({ id: `slice_${Date.now()}`, name, probability, color, linkedWheelId: null }); this.updateUI(); this.saveToStorage(); this.draw(); }
-    createSlice() { const name = document.getElementById('sliceName').value.trim(), probability = parseInt(document.getElementById('sliceProbability').value, 10), color = document.getElementById('sliceColor').value; if (!name || !probability || probability < 1 || probability > 100) return alert('Please enter a valid name and probability (1-100)'); this.addSlice(name, probability, color); document.getElementById('sliceName').value = ''; document.getElementById('sliceProbability').value = ''; this.toggleAddForm(); }
-    deleteSlice(id) { this.slices = this.slices.filter(slice => slice.id !== id); this.updateUI(); this.saveToStorage(); this.draw(); }
-
-    // 🔥 NEW METHOD — used by dropdown in updateUI()
-    setSliceLinkFromMain(sliceId, wheelId) {
-        const slice = this.slices.find(s => s.id === sliceId);
+    // NEW: Use existing modal for linking
+    function openLinkModal(wheelId, button) {
+        const row = button.closest('.linked-slice-editor');
+        const sliceIndex = Number(row.dataset.sliceIndex);
+        const slice = getWheel(wheelId)?.slices[sliceIndex];
         if (!slice) return;
 
-        slice.linkedWheelId = wheelId || null;
+        // Use existing modal from script.js
+        window.wheel.selectedSliceForLink = slice.id;
+        document.getElementById('sliceNameModal').textContent = slice.name;
 
-        this.saveToStorage();
-        this.updateUI();
-        this.draw();
+        const list = document.getElementById('wheelsList');
+        list.innerHTML = Object.keys(window.wheel.wheels)
+            .filter(w => w !== wheelId)
+            .map(w => `<div class="wheel-option" onclick="wheel.selectWheelForLink('${w}')">${window.wheel.wheels[w].name}</div>`)
+            .join('');
+
+        document.getElementById('wheelModal').classList.add('show');
     }
 
-    toggleAddForm() { const form = document.querySelector('.panel-section:nth-child(2)'); form.style.display = form.style.display === 'none' ? 'block' : 'none'; }
+    function deleteWheel(id) {
+        const app = getApp();
+        if (!app || id === 'main' || !app.wheels[id]) return;
+        if (!window.confirm(`Delete ${wheelLabel(id)} and remove all links to it?`)) return;
+        app.slices.forEach(slice => { if (slice.linkedWheelId === id) slice.linkedWheelId = null; });
+        Object.values(app.wheels).forEach(wheel => wheel.slices.forEach(slice => {
+            if (slice.linkedWheelId === id) slice.linkedWheelId = null;
+        }));
+        delete app.wheels[id];
+        saveChanges();
+        renderWheelOptions('main');
+    }
 
-    linkSliceToWheel(id) { this.selectedSliceForLink = id; document.getElementById('sliceNameModal').textContent = this.slices.find(s => s.id === id).name; const list = document.getElementById('wheelsList'); list.innerHTML = Object.keys(this.wheels).filter(w => w !== this.currentWheelId).map(w => `<div class="wheel-option" onclick="wheel.selectWheelForLink('${w}')">${this.wheels[w].name}</div>`).join(''); this.modal.classList.add('show'); }
-    selectWheelForLink(id) { const slice = this.slices.find(s => s.id === this.selectedSliceForLink); if (slice) slice.linkedWheelId = id; this.saveToStorage(); this.updateUI(); this.closeModal(); }
-    createNewWheel() { const name = document.getElementById('newWheelName').value.trim(); if (!name) return alert('Please enter a wheel name'); const id = `wheel_${Date.now()}`; this.wheels[id] = { id, name, slices: [] }; this.selectWheelForLink(id); }
-    closeModal() { this.modal.classList.remove('show');
+    function init() {
+        const select = document.getElementById('linkedWheelSelect');
+        if (!select) return;
+        select.addEventListener('change', renderSelectedWheel);
+        window.addEventListener('wheel-data-restored', () => renderWheelOptions(select.value || 'main'));
+        const start = () => {
+            if (getApp()) renderWheelOptions('main');
+            else setTimeout(start, 50);
+        };
+        start();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+})();

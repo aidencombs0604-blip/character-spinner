@@ -64,7 +64,7 @@ class Wheel {
             ['jinn', '🪔 Jinn Types', ['Wish Granter', 'Fire Jinn', 'Wind Jinn', 'Trickster Jinn', 'Ancient Jinn']],
             ['dragonborn', '🐲 Dragonborn Archetypes', ['Drake Knight', 'Breath Weapon Adept', 'Scale Guardian', 'Dragon Scholar', 'Wyrm Champion']]
         ];
-        const colors = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F'];
+        const colors = ['#4A1065', '#6B0A0A', '#7A4A00', '#1A2030', '#8B6914'];
         definitions.forEach(([id, name, names]) => {
             const wheelId = `wheel_${id}`;
             if (this.wheels[wheelId]) return;
@@ -84,17 +84,17 @@ class Wheel {
 
     addDefaultSlices() {
         const races = [
-            ['👨 Human', 'human', '#E8B8A0'], ['🐉 Dragon', 'dragon', '#E74C3C'],
-            ['😇 Angel', 'angel', '#F1C40F'], ['😈 Demon', 'demon', '#8E44AD'],
-            ['🔨 Golem', 'golem', '#95A5A6'], ['🧝 Elf', 'elf', '#27AE60'],
-            ['⛏️ Dwarf', 'dwarf', '#D35400'], ['👹 Orc', 'orc', '#5D8C3D'],
-            ['👺 Goblin', 'goblin', '#7CB342'], ['🧌 Troll', 'troll', '#607D8B'],
-            ['💀 Undead', 'undead', '#455A64'], ['🧑‍🌾 Halfling', 'halfling', '#A1887F'],
-            ['🧙 Gnome', 'gnome', '#00ACC1'], ['🧚 Fae', 'fae', '#EC407A'],
-            ['🧜 Merfolk', 'merfolk', '#2196F3'], ['🗻 Giant', 'giant', '#795548'],
-            ['🐾 Beastfolk', 'beastfolk', '#8D6E63'], ['🌪️ Elemental', 'elemental', '#26A69A'],
-            ['🤖 Construct', 'construct', '#78909C'], ['🧿 Witch', 'witch', '#6A1B9A'],
-            ['🪔 Jinn', 'jinn', '#FF8F00'], ['🐲 Dragonborn', 'dragonborn', '#C62828']
+            ['👨 Human', 'human', '#6B3A2A'], ['🐉 Dragon', 'dragon', '#7B1818'],
+            ['😇 Angel', 'angel', '#8B6914'], ['😈 Demon', 'demon', '#4A1040'],
+            ['🔨 Golem', 'golem', '#3D3D3D'], ['🧝 Elf', 'elf', '#1A5C2A'],
+            ['⛏️ Dwarf', 'dwarf', '#7A3800'], ['👹 Orc', 'orc', '#2E5C1A'],
+            ['👺 Goblin', 'goblin', '#3A5C10'], ['🧌 Troll', 'troll', '#2C3E4A'],
+            ['💀 Undead', 'undead', '#1C2A2E'], ['🧑‍🌾 Halfling', 'halfling', '#5C3A2A'],
+            ['🧙 Gnome', 'gnome', '#0A4A5A'], ['🧚 Fae', 'fae', '#7A1040'],
+            ['🧜 Merfolk', 'merfolk', '#0A2E6B'], ['🗻 Giant', 'giant', '#4A2A1A'],
+            ['🐾 Beastfolk', 'beastfolk', '#4A2E24'], ['🌪️ Elemental', 'elemental', '#0A4A44'],
+            ['🤖 Construct', 'construct', '#2A3A42'], ['🧿 Witch', 'witch', '#3A0A5A'],
+            ['🪔 Jinn', 'jinn', '#7A4A00'], ['🐲 Dragonborn', 'dragonborn', '#6B0A0A']
         ];
         const oldIds = new Set(this.slices.map(slice => slice.raceId || slice.linkedWheelId));
         const now = Date.now();

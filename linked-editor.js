@@ -1,6 +1,6 @@
 // Hierarchical wheel editor for the main race wheel and every linked wheel.
 (function () {
-    const palette = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F', '#2ECC71', '#3498DB'];
+    const palette = ['#4A1060', '#7D1A1A', '#7A4A14', '#1C2C3E', '#6B4A0A', '#1A4A2A', '#0A2A4E'];
 
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>'"]/g, character => ({
@@ -68,7 +68,7 @@
                 <div class="editor-grid">
                     <input id="newLinkedName" class="input" type="text" placeholder="Slice name">
                     <input id="newLinkedProbability" class="input" type="number" min="1" max="100" value="20" placeholder="Probability">
-                    <input id="newLinkedColor" class="linked-color" type="color" value="#667eea" aria-label="Slice color">
+                    <input id="newLinkedColor" class="linked-color" type="color" value="#4A1060" aria-label="Slice color">
                     <button id="addLinkedSlice" class="btn btn-primary" type="button">Add slice</button>
                 </div>
             </div>`;
@@ -109,7 +109,7 @@
                 .filter(id => id !== currentWheelId)
                 .map(id => `<option value="${escapeHtml(id)}" ${slice.linkedWheelId === id ? 'selected' : ''}>${escapeHtml(wheelLabel(id))}</option>`));
 
-        const color = /^#[0-9a-f]{6}$/i.test(slice.color) ? slice.color : '#667eea';
+        const color = /^#[0-9a-f]{6}$/i.test(slice.color) ? slice.color : '#4A1060';
         return `
             <div class="linked-slice-editor" data-slice-index="${index}">
                 <input class="input editor-slice-name" type="text" value="${escapeHtml(slice.name)}" aria-label="Slice name">

@@ -24,6 +24,7 @@ class Wheel {
         this.addDefaultSlices();
         this.updateUI();
         this.draw();
+        this.saveToStorage();
     }
 
     initializeEventListeners() {
@@ -39,7 +40,6 @@ class Wheel {
     }
 
     createPredefinedWheels() {
-        if (Object.keys(this.wheels).length) return;
         const definitions = [
             ['human', '👨 Human Archetypes', ['Mage', 'Gladiator', 'Archer', 'Rogue', 'Paladin']],
             ['dragon', '🐉 Dragon Types', ['Fire Dragon', 'Ice Dragon', 'Lightning Dragon', 'Shadow Dragon', 'Gold Dragon']],
@@ -47,17 +47,35 @@ class Wheel {
             ['demon', '😈 Demon Types', ['Imp', 'Succubus', 'Overlord', 'Corrupted', 'Trickster']],
             ['golem', '🔨 Golem Materials', ['Steel Golem', 'Gold Golem', 'Silver Golem', 'Stone Golem', 'Clay Golem']],
             ['elf', '🧝 Elf Types', ['High Elf', 'Dark Elf', 'Wood Elf', 'Sea Elf', 'Twilight Elf']],
-            ['dwarf', '⛏️ Dwarf Types', ['Blacksmith Dwarf', 'Miner Dwarf', 'Berserker Dwarf', 'Mountain Dwarf', 'Rune Dwarf']]
+            ['dwarf', '⛏️ Dwarf Types', ['Blacksmith Dwarf', 'Miner Dwarf', 'Berserker Dwarf', 'Mountain Dwarf', 'Rune Dwarf']],
+            ['orc', '👹 Orc Clans', ['War Chief', 'Berserker', 'Shaman', ' raider'.trim(), 'Beast Rider']],
+            ['goblin', '👺 Goblin Types', ['Cave Goblin', 'Hobgoblin', 'Goblin Tinkerer', 'Goblin Rogue', 'Goblin King']],
+            ['troll', '🧌 Troll Types', ['Mountain Troll', 'River Troll', 'Forest Troll', 'Ice Troll', 'Bridge Troll']],
+            ['undead', '💀 Undead Types', ['Skeleton', 'Zombie', 'Wraith', 'Vampire', 'Lich']],
+            ['halfling', '🧑‍🌾 Halfling Archetypes', ['Burglar', 'Innkeeper', 'Farmer', 'Storyteller', 'Lucky Wanderer']],
+            ['gnome', '🧙 Gnome Types', ['Inventor', 'Illusionist', 'Alchemist', 'Clockmaker', 'Garden Gnome']],
+            ['fae', '🧚 Fae Types', ['Pixie', 'Dryad', 'Sprite', 'Satyr', 'Fairy Queen']],
+            ['merfolk', '🧜 Merfolk Types', ['Tide Caller', 'Pearl Diver', 'Siren', 'Reef Guardian', 'Sea King']],
+            ['giant', '🗻 Giant Types', ['Storm Giant', 'Fire Giant', 'Frost Giant', 'Stone Giant', 'Cloud Giant']],
+            ['beastfolk', '🐾 Beastfolk Archetypes', ['Wolf Warrior', 'Cat Scout', 'Bear Guardian', 'Fox Trickster', 'Raven Seer']],
+            ['elemental', '🌪️ Elemental Types', ['Fire Elemental', 'Water Elemental', 'Earth Elemental', 'Air Elemental', 'Void Elemental']],
+            ['construct', '🤖 Construct Types', ['Clockwork', 'Guardian', 'Automaton', 'War Machine', 'Sentinel']],
+            ['witch', '🧿 Witch Archetypes', ['Hedge Witch', 'Storm Witch', 'Potion Witch', 'Hex Witch', 'Seer']],
+            ['jinn', '🪔 Jinn Types', ['Wish Granter', 'Fire Jinn', 'Wind Jinn', 'Trickster Jinn', 'Ancient Jinn']],
+            ['dragonborn', '🐲 Dragonborn Archetypes', ['Drake Knight', 'Breath Weapon Adept', 'Scale Guardian', 'Dragon Scholar', 'Wyrm Champion']]
         ];
+        const colors = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F'];
         definitions.forEach(([id, name, names]) => {
-            this.wheels[`wheel_${id}`] = {
-                id: `wheel_${id}`,
+            const wheelId = `wheel_${id}`;
+            if (this.wheels[wheelId]) return;
+            this.wheels[wheelId] = {
+                id: wheelId,
                 name,
                 slices: names.map((sliceName, i) => ({
                     id: `${id}_${i}`,
                     name: sliceName,
                     probability: 20,
-                    color: ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F'][i],
+                    color: colors[i],
                     linkedWheelId: null
                 }))
             };
@@ -65,76 +83,60 @@ class Wheel {
     }
 
     addDefaultSlices() {
-        if (this.slices.length) return;
         const races = [
-            ['👨 Human', 17, '#E8B8A0', 'wheel_human'],
-            ['🐉 Dragon', 17, '#E74C3C', 'wheel_dragon'],
-            ['😇 Angel', 17, '#F1C40F', 'wheel_angel'],
-            ['😈 Demon', 17, '#8E44AD', 'wheel_demon'],
-            ['🔨 Golem', 17, '#95A5A6', 'wheel_golem'],
-            ['🧝 Elf', 17, '#27AE60', 'wheel_elf'],
-            ['⛏️ Dwarf', 2, '#D35400', 'wheel_dwarf']
+            ['👨 Human', 'human', '#E8B8A0'], ['🐉 Dragon', 'dragon', '#E74C3C'],
+            ['😇 Angel', 'angel', '#F1C40F'], ['😈 Demon', 'demon', '#8E44AD'],
+            ['🔨 Golem', 'golem', '#95A5A6'], ['🧝 Elf', 'elf', '#27AE60'],
+            ['⛏️ Dwarf', 'dwarf', '#D35400'], ['👹 Orc', 'orc', '#5D8C3D'],
+            ['👺 Goblin', 'goblin', '#7CB342'], ['🧌 Troll', 'troll', '#607D8B'],
+            ['💀 Undead', 'undead', '#455A64'], ['🧑‍🌾 Halfling', 'halfling', '#A1887F'],
+            ['🧙 Gnome', 'gnome', '#00ACC1'], ['🧚 Fae', 'fae', '#EC407A'],
+            ['🧜 Merfolk', 'merfolk', '#2196F3'], ['🗻 Giant', 'giant', '#795548'],
+            ['🐾 Beastfolk', 'beastfolk', '#8D6E63'], ['🌪️ Elemental', 'elemental', '#26A69A'],
+            ['🤖 Construct', 'construct', '#78909C'], ['🧿 Witch', 'witch', '#6A1B9A'],
+            ['🪔 Jinn', 'jinn', '#FF8F00'], ['🐲 Dragonborn', 'dragonborn', '#C62828']
         ];
-        this.slices = races.map(([name, probability, color, linkedWheelId], i) => ({
-            id: `slice_${Date.now()}_${i}`,
-            name, probability, color, linkedWheelId
-        }));
-        this.saveToStorage();
+        const oldIds = new Set(this.slices.map(slice => slice.raceId || slice.linkedWheelId));
+        const now = Date.now();
+        races.forEach(([name, id, color], index) => {
+            const wheelId = `wheel_${id}`;
+            if (oldIds.has(wheelId)) return;
+            this.slices.push({
+                id: `slice_${now}_${index}`,
+                raceId: id,
+                name,
+                probability: id === 'dwarf' ? 2 : 5,
+                color,
+                linkedWheelId: wheelId
+            });
+        });
     }
 
     updateUI() {
         this.slicesListDiv.innerHTML = this.slices.map(slice => {
             const linked = slice.linkedWheelId && this.wheels[slice.linkedWheelId];
-            return `<div class="slice-item">
-                <div class="slice-color" style="background-color:${slice.color}"></div>
-                <div class="slice-info"><div class="slice-name">${slice.name}</div>
-                <div class="slice-probability">${slice.probability}%</div>
-                ${linked ? `<div class="slice-linked">→ ${linked.name}</div>` : ''}</div>
-                <div class="slice-actions">
-                    <button class="slice-link-btn" onclick="wheel.linkSliceToWheel('${slice.id}')">Link</button>
-                    <button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button>
-                </div></div>`;
+            return `<div class="slice-item"><div class="slice-color" style="background-color:${slice.color}"></div><div class="slice-info"><div class="slice-name">${slice.name}</div><div class="slice-probability">${slice.probability}%</div>${linked ? `<div class="slice-linked">→ ${linked.name}</div>` : ''}</div><div class="slice-actions"><button class="slice-link-btn" onclick="wheel.linkSliceToWheel('${slice.id}')">Link</button><button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button></div></div>`;
         }).join('');
         this.backBtn.style.display = this.wheelHistory.length ? 'block' : 'none';
     }
 
     draw() {
-        const cx = this.canvas.width / 2, cy = this.canvas.height / 2;
-        const radius = Math.min(cx, cy) - 10;
+        const cx = this.canvas.width / 2, cy = this.canvas.height / 2, radius = Math.min(cx, cy) - 10;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         const total = this.slices.reduce((sum, s) => sum + Number(s.probability), 0);
+        if (!total) return;
         let angle = this.currentRotation;
         this.slices.forEach(slice => {
             const size = Number(slice.probability) / total * Math.PI * 2;
-            this.ctx.beginPath();
-            this.ctx.moveTo(cx, cy);
-            this.ctx.arc(cx, cy, radius, angle, angle + size);
-            this.ctx.closePath();
-            this.ctx.fillStyle = slice.color;
-            this.ctx.fill();
-            this.ctx.strokeStyle = '#fff';
-            this.ctx.lineWidth = 2;
-            this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.moveTo(cx, cy); this.ctx.arc(cx, cy, radius, angle, angle + size); this.ctx.closePath();
+            this.ctx.fillStyle = slice.color; this.ctx.fill(); this.ctx.strokeStyle = '#fff'; this.ctx.lineWidth = 2; this.ctx.stroke();
             const textAngle = angle + size / 2;
-            this.ctx.save();
-            this.ctx.translate(cx + Math.cos(textAngle) * radius * .65, cy + Math.sin(textAngle) * radius * .65);
-            this.ctx.rotate(textAngle);
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 14px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText(slice.name, 0, 0);
-            this.ctx.restore();
+            this.ctx.save(); this.ctx.translate(cx + Math.cos(textAngle) * radius * .65, cy + Math.sin(textAngle) * radius * .65); this.ctx.rotate(textAngle);
+            this.ctx.fillStyle = '#fff'; this.ctx.font = 'bold 14px Arial'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle'; this.ctx.fillText(slice.name, 0, 0); this.ctx.restore();
             angle += size;
         });
-        this.ctx.beginPath();
-        this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        this.ctx.strokeStyle = '#333';
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
-        this.ctx.fillStyle = '#ff6b6b';
-        this.ctx.beginPath();
-        this.ctx.moveTo(cx, 20); this.ctx.lineTo(cx - 15, 50); this.ctx.lineTo(cx + 15, 50); this.ctx.closePath(); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(cx, cy, radius, 0, Math.PI * 2); this.ctx.strokeStyle = '#333'; this.ctx.lineWidth = 3; this.ctx.stroke();
+        this.ctx.fillStyle = '#ff6b6b'; this.ctx.beginPath(); this.ctx.moveTo(cx, 20); this.ctx.lineTo(cx - 15, 50); this.ctx.lineTo(cx + 15, 50); this.ctx.closePath(); this.ctx.fill();
     }
 
     chooseWeightedSlice() {
@@ -144,15 +146,11 @@ class Wheel {
     }
 
     rotationForSlice(slice) {
-        const pointer = -Math.PI / 2;
-        const total = this.slices.reduce((sum, s) => sum + Number(s.probability), 0);
+        const pointer = -Math.PI / 2, total = this.slices.reduce((sum, s) => sum + Number(s.probability), 0);
         let start = 0;
         for (const candidate of this.slices) {
             const size = Number(candidate.probability) / total * Math.PI * 2;
-            if (candidate === slice) {
-                // Put the center of the chosen slice exactly under the pointer.
-                return pointer - (start + size / 2);
-            }
+            if (candidate === slice) return pointer - (start + size / 2);
             start += size;
         }
         return this.currentRotation;
@@ -160,128 +158,48 @@ class Wheel {
 
     spin() {
         if (this.isSpinning || !this.slices.length) return;
-        this.isSpinning = true;
-        this.spinBtn.disabled = true;
-        this.pendingWinner = this.chooseWeightedSlice();
-        const target = this.rotationForSlice(this.pendingWinner);
-        const current = this.currentRotation;
-        const fullTurns = 10 + Math.floor(Math.random() * 10);
-        const normalizedTarget = ((target % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        const normalizedCurrent = ((current % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-        const shortestPositiveDelta = (normalizedTarget - normalizedCurrent + Math.PI * 2) % (Math.PI * 2);
-        const end = current + fullTurns * Math.PI * 2 + shortestPositiveDelta;
-        const startTime = performance.now();
-        const duration = 3000 + Math.random() * 2000;
-        const animate = now => {
-            const progress = Math.min((now - startTime) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            this.currentRotation = current + (end - current) * eased;
-            this.draw();
-            if (progress < 1) requestAnimationFrame(animate);
-            else this.onSpinComplete();
-        };
+        this.isSpinning = true; this.spinBtn.disabled = true; this.pendingWinner = this.chooseWeightedSlice();
+        const target = this.rotationForSlice(this.pendingWinner), current = this.currentRotation, fullTurns = 10 + Math.floor(Math.random() * 10), twoPi = Math.PI * 2;
+        const normalizedTarget = ((target % twoPi) + twoPi) % twoPi, normalizedCurrent = ((current % twoPi) + twoPi) % twoPi;
+        const end = current + fullTurns * twoPi + (normalizedTarget - normalizedCurrent + twoPi) % twoPi;
+        const startTime = performance.now(), duration = 3000 + Math.random() * 2000;
+        const animate = now => { const progress = Math.min((now - startTime) / duration, 1), eased = 1 - Math.pow(1 - progress, 3); this.currentRotation = current + (end - current) * eased; this.draw(); if (progress < 1) requestAnimationFrame(animate); else this.onSpinComplete(); };
         requestAnimationFrame(animate);
     }
 
     onSpinComplete() {
-        const winner = this.pendingWinner;
-        this.playFlamesAnimation();
-        setTimeout(() => {
-            if (winner && winner.linkedWheelId) this.transitionToWheel(winner.linkedWheelId, winner.name);
-            else if (winner) this.showResult(winner);
-            this.isSpinning = false;
-            this.spinBtn.disabled = false;
-            this.pendingWinner = null;
-        }, 2000);
+        const winner = this.pendingWinner; this.playFlamesAnimation();
+        setTimeout(() => { if (winner && winner.linkedWheelId) this.transitionToWheel(winner.linkedWheelId, winner.name); else if (winner) this.showResult(winner); this.isSpinning = false; this.spinBtn.disabled = false; this.pendingWinner = null; }, 2000);
     }
 
-    showResult(slice) {
-        this.resultDisplay.classList.add('winner');
-        this.resultDisplay.innerHTML = `<div style="text-align:center"><div style="font-size:2rem;margin-bottom:10px">🎯</div><div>You got: <strong>${slice.name}</strong></div></div>`;
-    }
+    showResult(slice) { this.resultDisplay.classList.add('winner'); this.resultDisplay.innerHTML = `<div style="text-align:center"><div style="font-size:2rem;margin-bottom:10px">🎯</div><div>You got: <strong>${slice.name}</strong></div></div>`; }
 
     transitionToWheel(wheelId, raceName) {
         this.wheelHistory.push({ wheelId: this.currentWheelId, slices: JSON.parse(JSON.stringify(this.slices)) });
-        this.currentWheelId = wheelId;
-        const next = this.wheels[wheelId];
-        this.slices = JSON.parse(JSON.stringify(next.slices));
-        this.wheelTitle.textContent = next.name;
-        this.showResult({ name: `You selected ${raceName}!` });
-        this.currentRotation = 0;
-        this.updateUI(); this.draw();
+        this.currentWheelId = wheelId; const next = this.wheels[wheelId];
+        this.slices = JSON.parse(JSON.stringify(next.slices)); this.wheelTitle.textContent = next.name; this.showResult({ name: `You selected ${raceName}!` });
+        this.currentRotation = 0; this.updateUI(); this.draw();
     }
 
     goBack() {
         if (!this.wheelHistory.length) return;
-        const previous = this.wheelHistory.pop();
-        this.currentWheelId = previous.wheelId;
-        this.slices = previous.slices;
-        this.wheelTitle.textContent = this.currentWheelId === 'main' ? 'Main Wheel' : this.wheels[this.currentWheelId].name;
-        this.currentRotation = 0;
-        this.updateUI(); this.draw(); this.saveToStorage();
+        const previous = this.wheelHistory.pop(); this.currentWheelId = previous.wheelId; this.slices = previous.slices;
+        this.wheelTitle.textContent = this.currentWheelId === 'main' ? 'Main Wheel' : this.wheels[this.currentWheelId].name; this.currentRotation = 0; this.updateUI(); this.draw(); this.saveToStorage();
     }
 
-    addSlice(name, probability, color) {
-        this.slices.push({ id: `slice_${Date.now()}`, name, probability, color, linkedWheelId: null });
-        this.updateUI(); this.saveToStorage(); this.draw();
-    }
-
-    createSlice() {
-        const name = document.getElementById('sliceName').value.trim();
-        const probability = parseInt(document.getElementById('sliceProbability').value, 10);
-        const color = document.getElementById('sliceColor').value;
-        if (!name || !probability || probability < 1 || probability > 100) return alert('Please enter a valid name and probability (1-100)');
-        this.addSlice(name, probability, color);
-        document.getElementById('sliceName').value = '';
-        document.getElementById('sliceProbability').value = '';
-        this.toggleAddForm();
-    }
-
+    addSlice(name, probability, color) { this.slices.push({ id: `slice_${Date.now()}`, name, probability, color, linkedWheelId: null }); this.updateUI(); this.saveToStorage(); this.draw(); }
+    createSlice() { const name = document.getElementById('sliceName').value.trim(), probability = parseInt(document.getElementById('sliceProbability').value, 10), color = document.getElementById('sliceColor').value; if (!name || !probability || probability < 1 || probability > 100) return alert('Please enter a valid name and probability (1-100)'); this.addSlice(name, probability, color); document.getElementById('sliceName').value = ''; document.getElementById('sliceProbability').value = ''; this.toggleAddForm(); }
     deleteSlice(id) { this.slices = this.slices.filter(slice => slice.id !== id); this.updateUI(); this.saveToStorage(); this.draw(); }
     toggleAddForm() { const form = document.querySelector('.panel-section:nth-child(2)'); form.style.display = form.style.display === 'none' ? 'block' : 'none'; }
 
-    linkSliceToWheel(id) {
-        this.selectedSliceForLink = id;
-        document.getElementById('sliceNameModal').textContent = this.slices.find(s => s.id === id).name;
-        const list = document.getElementById('wheelsList');
-        list.innerHTML = Object.keys(this.wheels).filter(w => w !== this.currentWheelId).map(w => `<div class="wheel-option" onclick="wheel.selectWheelForLink('${w}')">${this.wheels[w].name}</div>`).join('');
-        this.modal.classList.add('show');
-    }
-
+    linkSliceToWheel(id) { this.selectedSliceForLink = id; document.getElementById('sliceNameModal').textContent = this.slices.find(s => s.id === id).name; const list = document.getElementById('wheelsList'); list.innerHTML = Object.keys(this.wheels).filter(w => w !== this.currentWheelId).map(w => `<div class="wheel-option" onclick="wheel.selectWheelForLink('${w}')">${this.wheels[w].name}</div>`).join(''); this.modal.classList.add('show'); }
     selectWheelForLink(id) { const slice = this.slices.find(s => s.id === this.selectedSliceForLink); if (slice) slice.linkedWheelId = id; this.saveToStorage(); this.updateUI(); this.closeModal(); }
-    createNewWheel() {
-        const name = document.getElementById('newWheelName').value.trim();
-        if (!name) return alert('Please enter a wheel name');
-        const id = `wheel_${Date.now()}`;
-        this.wheels[id] = { id, name, slices: [] };
-        this.selectWheelForLink(id);
-    }
+    createNewWheel() { const name = document.getElementById('newWheelName').value.trim(); if (!name) return alert('Please enter a wheel name'); const id = `wheel_${Date.now()}`; this.wheels[id] = { id, name, slices: [] }; this.selectWheelForLink(id); }
     closeModal() { this.modal.classList.remove('show'); document.getElementById('newWheelName').value = ''; }
-
-    playFlamesAnimation() {
-        const container = document.getElementById('flamesContainer');
-        container.innerHTML = '';
-        for (let i = 0; i < 15; i++) {
-            const flame = document.createElement('div');
-            flame.className = 'flame';
-            flame.style.left = Math.random() * window.innerWidth + 'px';
-            flame.style.setProperty('--drift', (Math.random() - .5) * 100 + 'px');
-            flame.style.animationDelay = Math.random() * .5 + 's';
-            container.appendChild(flame);
-        }
-    }
-
+    playFlamesAnimation() { const container = document.getElementById('flamesContainer'); container.innerHTML = ''; for (let i = 0; i < 15; i++) { const flame = document.createElement('div'); flame.className = 'flame'; flame.style.left = Math.random() * window.innerWidth + 'px'; flame.style.setProperty('--drift', (Math.random() - .5) * 100 + 'px'); flame.style.animationDelay = Math.random() * .5 + 's'; container.appendChild(flame); } }
     saveToStorage() { localStorage.setItem('wheelSpinnerData', JSON.stringify({ wheels: this.wheels, mainSlices: this.currentWheelId === 'main' ? this.slices : undefined })); }
-    loadFromStorage() {
-        try {
-            const data = JSON.parse(localStorage.getItem('wheelSpinnerData') || 'null');
-            if (data) { this.wheels = data.wheels || {}; this.slices = data.mainSlices || []; }
-        } catch (_) { this.wheels = {}; this.slices = []; }
-    }
+    loadFromStorage() { try { const data = JSON.parse(localStorage.getItem('wheelSpinnerData') || 'null'); if (data) { this.wheels = data.wheels || {}; this.slices = data.mainSlices || []; } } catch (_) { this.wheels = {}; this.slices = []; } }
 }
 
 let wheel;
-document.addEventListener('DOMContentLoaded', () => {
-    wheel = new Wheel();
-    document.querySelector('.panel-section:nth-child(2)').style.display = 'none';
-});
+document.addEventListener('DOMContentLoaded', () => { wheel = new Wheel(); document.querySelector('.panel-section:nth-child(2)').style.display = 'none'; });

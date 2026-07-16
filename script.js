@@ -48,7 +48,7 @@ class Wheel {
             ['golem', '🔨 Golem Materials', ['Steel Golem', 'Gold Golem', 'Silver Golem', 'Stone Golem', 'Clay Golem']],
             ['elf', '🧝 Elf Types', ['High Elf', 'Dark Elf', 'Wood Elf', 'Sea Elf', 'Twilight Elf']],
             ['dwarf', '⛏️ Dwarf Types', ['Blacksmith Dwarf', 'Miner Dwarf', 'Berserker Dwarf', 'Mountain Dwarf', 'Rune Dwarf']],
-            ['orc', '👹 Orc Clans', ['War Chief', 'Berserker', 'Shaman', ' raider'.trim(), 'Beast Rider']],
+            ['orc', '👹 Orc Clans', ['War Chief', 'Berserker', 'Shaman', 'Raider', 'Beast Rider']],
             ['goblin', '👺 Goblin Types', ['Cave Goblin', 'Hobgoblin', 'Goblin Tinkerer', 'Goblin Rogue', 'Goblin King']],
             ['troll', '🧌 Troll Types', ['Mountain Troll', 'River Troll', 'Forest Troll', 'Ice Troll', 'Bridge Troll']],
             ['undead', '💀 Undead Types', ['Skeleton', 'Zombie', 'Wraith', 'Vampire', 'Lich']],
@@ -112,11 +112,40 @@ class Wheel {
         });
     }
 
+    // 🔥 NEW PATCHED VERSION — includes dropdown for linking existing wheels
     updateUI() {
         this.slicesListDiv.innerHTML = this.slices.map(slice => {
             const linked = slice.linkedWheelId && this.wheels[slice.linkedWheelId];
-            return `<div class="slice-item"><div class="slice-color" style="background-color:${slice.color}"></div><div class="slice-info"><div class="slice-name">${slice.name}</div><div class="slice-probability">${slice.probability}%</div>${linked ? `<div class="slice-linked">→ ${linked.name}</div>` : ''}</div><div class="slice-actions"><button class="slice-link-btn" onclick="wheel.linkSliceToWheel('${slice.id}')">Link</button><button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button></div></div>`;
+
+            return `
+                <div class="slice-item">
+                    <div class="slice-color" style="background-color:${slice.color}"></div>
+
+                    <div class="slice-info">
+                        <div class="slice-name">${slice.name}</div>
+                        <div class="slice-probability">${slice.probability}%</div>
+                        ${linked ? `<div class="slice-linked">→ ${linked.name}</div>` : ''}
+                    </div>
+
+                    <div class="slice-actions">
+
+                        <!-- NEW: Link existing wheels dropdown -->
+                        <select class="input slice-link-select"
+                                onchange="wheel.setSliceLinkFromMain('${slice.id}', this.value)">
+                            <option value="">No linked wheel</option>
+                            ${Object.keys(this.wheels).map(id =>
+                                `<option value="${id}" ${slice.linkedWheelId === id ? 'selected' : ''}>
+                                    ${this.wheels[id].name}
+                                </option>`
+                            ).join('')}
+                        </select>
+
+                        <button class="slice-delete" onclick="wheel.deleteSlice('${slice.id}')">Delete</button>
+                    </div>
+                </div>
+            `;
         }).join('');
+
         this.backBtn.style.display = this.wheelHistory.length ? 'block' : 'none';
     }
 
@@ -190,16 +219,22 @@ class Wheel {
     addSlice(name, probability, color) { this.slices.push({ id: `slice_${Date.now()}`, name, probability, color, linkedWheelId: null }); this.updateUI(); this.saveToStorage(); this.draw(); }
     createSlice() { const name = document.getElementById('sliceName').value.trim(), probability = parseInt(document.getElementById('sliceProbability').value, 10), color = document.getElementById('sliceColor').value; if (!name || !probability || probability < 1 || probability > 100) return alert('Please enter a valid name and probability (1-100)'); this.addSlice(name, probability, color); document.getElementById('sliceName').value = ''; document.getElementById('sliceProbability').value = ''; this.toggleAddForm(); }
     deleteSlice(id) { this.slices = this.slices.filter(slice => slice.id !== id); this.updateUI(); this.saveToStorage(); this.draw(); }
+
+    // 🔥 NEW METHOD — used by dropdown in updateUI()
+    setSliceLinkFromMain(sliceId, wheelId) {
+        const slice = this.slices.find(s => s.id === sliceId);
+        if (!slice) return;
+
+        slice.linkedWheelId = wheelId || null;
+
+        this.saveToStorage();
+        this.updateUI();
+        this.draw();
+    }
+
     toggleAddForm() { const form = document.querySelector('.panel-section:nth-child(2)'); form.style.display = form.style.display === 'none' ? 'block' : 'none'; }
 
     linkSliceToWheel(id) { this.selectedSliceForLink = id; document.getElementById('sliceNameModal').textContent = this.slices.find(s => s.id === id).name; const list = document.getElementById('wheelsList'); list.innerHTML = Object.keys(this.wheels).filter(w => w !== this.currentWheelId).map(w => `<div class="wheel-option" onclick="wheel.selectWheelForLink('${w}')">${this.wheels[w].name}</div>`).join(''); this.modal.classList.add('show'); }
     selectWheelForLink(id) { const slice = this.slices.find(s => s.id === this.selectedSliceForLink); if (slice) slice.linkedWheelId = id; this.saveToStorage(); this.updateUI(); this.closeModal(); }
     createNewWheel() { const name = document.getElementById('newWheelName').value.trim(); if (!name) return alert('Please enter a wheel name'); const id = `wheel_${Date.now()}`; this.wheels[id] = { id, name, slices: [] }; this.selectWheelForLink(id); }
-    closeModal() { this.modal.classList.remove('show'); document.getElementById('newWheelName').value = ''; }
-    playFlamesAnimation() { const container = document.getElementById('flamesContainer'); container.innerHTML = ''; for (let i = 0; i < 15; i++) { const flame = document.createElement('div'); flame.className = 'flame'; flame.style.left = Math.random() * window.innerWidth + 'px'; flame.style.setProperty('--drift', (Math.random() - .5) * 100 + 'px'); flame.style.animationDelay = Math.random() * .5 + 's'; container.appendChild(flame); } }
-    saveToStorage() { localStorage.setItem('wheelSpinnerData', JSON.stringify({ wheels: this.wheels, mainSlices: this.currentWheelId === 'main' ? this.slices : undefined })); }
-    loadFromStorage() { try { const data = JSON.parse(localStorage.getItem('wheelSpinnerData') || 'null'); if (data) { this.wheels = data.wheels || {}; this.slices = data.mainSlices || []; } } catch (_) { this.wheels = {}; this.slices = []; } }
-}
-
-let wheel;
-document.addEventListener('DOMContentLoaded', () => { wheel = new Wheel(); document.querySelector('.panel-section:nth-child(2)').style.display = 'none'; });
+    closeModal() { this.modal.classList.remove('show');

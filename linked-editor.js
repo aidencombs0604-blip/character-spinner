@@ -128,7 +128,7 @@
                     <button class="btn btn-success save-editor-slice" type="button">Save slice</button>
                     <button class="btn slice-delete delete-editor-slice" type="button">Delete slice</button>
 
-                    <!-- NEW: unified Link button -->
+                    <!-- NEW unified Link button -->
                     <button class="btn btn-primary link-existing-button" type="button">Link</button>
                 </div>
                 <span class="linked-save-status" aria-live="polite"></span>
@@ -199,7 +199,6 @@
         const slice = getWheel(wheelId)?.slices[sliceIndex];
         if (!slice) return;
 
-        // Use existing modal from script.js
         window.wheel.selectedSliceForLink = slice.id;
         document.getElementById('sliceNameModal').textContent = slice.name;
 

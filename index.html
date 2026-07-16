@@ -64,18 +64,27 @@
         <div id="flamesContainer" class="flames-container"></div>
     </div>
 
+    <!-- ⭐ Medieval Fantasy Link Modal (patched) -->
     <div id="wheelModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content medieval-modal">
             <span class="close">&times;</span>
-            <h2>Link Wheel to Slice: <span id="sliceNameModal"></span></h2>
-            <div class="modal-section">
-                <h3>Create New Wheel or Select Existing</h3>
-                <input type="text" id="newWheelName" placeholder="New wheel name" class="input">
-                <button id="createWheelBtn" class="btn btn-success">Create New Wheel</button>
+
+            <h2 class="medieval-title">🔗 Link Wheel</h2>
+
+            <div class="medieval-section">
+                <div class="medieval-label">Slice:</div>
+                <div id="sliceNameModal" class="medieval-value"></div>
             </div>
-            <div class="modal-section">
-                <h3>Or Select Existing Wheel</h3>
-                <div id="wheelsList" class="wheels-list"></div>
+
+            <div class="medieval-section">
+                <div class="medieval-label">Existing Wheels</div>
+                <div id="wheelsList" class="medieval-wheel-list"></div>
+            </div>
+
+            <div class="medieval-section">
+                <div class="medieval-label">Create New Wheel</div>
+                <input id="newWheelName" class="medieval-input" type="text" placeholder="Enter new wheel name">
+                <button id="createWheelBtn" class="medieval-btn">Create Wheel</button>
             </div>
         </div>
     </div>

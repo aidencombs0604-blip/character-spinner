@@ -1,6 +1,6 @@
-// Restore and merge predefined race wheels without deleting user data.
+// Force-rebuild the original race wheel and all predefined race links.
 (function () {
-    const raceDefinitions = [
+    const definitions = [
         ['human', '👨 Human', '👨 Human Archetypes', ['Mage', 'Gladiator', 'Archer', 'Rogue', 'Paladin'], '#E8B8A0'],
         ['dragon', '🐉 Dragon', '🐉 Dragon Types', ['Fire Dragon', 'Ice Dragon', 'Lightning Dragon', 'Shadow Dragon', 'Gold Dragon'], '#E74C3C'],
         ['angel', '😇 Angel', '😇 Angel Types', ['Holy Angel', 'Guardian Angel', 'Messenger Angel', 'Fallen Angel', 'Warrior Angel'], '#F1C40F'],
@@ -24,50 +24,57 @@
         ['jinn', '🪔 Jinn', '🪔 Jinn Types', ['Wish Granter', 'Fire Jinn', 'Wind Jinn', 'Trickster Jinn', 'Ancient Jinn'], '#FF8F00'],
         ['dragonborn', '🐲 Dragonborn', '🐲 Dragonborn Archetypes', ['Drake Knight', 'Breath Weapon Adept', 'Scale Guardian', 'Dragon Scholar', 'Wyrm Champion'], '#C62828']
     ];
-    const colors = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F'];
+    const sliceColors = ['#9B59B6', '#E74C3C', '#F39C12', '#2C3E50', '#F1C40F'];
 
-    function restoreRaces() {
+    function rebuildRaces() {
         if (!window.wheel) return;
         const app = window.wheel;
-        const existingMain = new Set(app.slices.map(slice => slice.linkedWheelId));
-        const timestamp = Date.now();
-        let changed = false;
+        const oldWheels = app.wheels || {};
+        const rebuiltWheels = {};
+        const rebuiltMainSlices = [];
 
-        raceDefinitions.forEach(([id, raceName, wheelName, sliceNames, raceColor], raceIndex) => {
+        definitions.forEach(([id, raceLabel, wheelLabel, names, raceColor]) => {
             const wheelId = `wheel_${id}`;
-            if (!app.wheels[wheelId]) {
-                app.wheels[wheelId] = {
-                    id: wheelId,
-                    name: wheelName,
-                    slices: sliceNames.map((name, index) => ({
-                        id: `${id}_${index}`,
-                        name,
-                        probability: 20,
-                        color: colors[index],
-                        linkedWheelId: null
-                    }))
-                };
-                changed = true;
-            }
-            if (!existingMain.has(wheelId)) {
-                app.slices.push({
-                    id: `restored_${timestamp}_${raceIndex}`,
-                    name: raceName,
-                    probability: id === 'dwarf' ? 2 : 5,
-                    color: raceColor,
-                    linkedWheelId: wheelId
-                });
-                changed = true;
-            }
+            const old = oldWheels[wheelId];
+            rebuiltWheels[wheelId] = {
+                id: wheelId,
+                name: old?.name || wheelLabel,
+                slices: names.map((name, index) => {
+                    const oldSlice = old?.slices?.[index];
+                    return {
+                        id: oldSlice?.id || `${id}_${index}`,
+                        name: oldSlice?.name || name,
+                        probability: Number(oldSlice?.probability) > 0 ? Number(oldSlice.probability) : 20,
+                        color: oldSlice?.color || sliceColors[index],
+                        linkedWheelId: oldSlice?.linkedWheelId || null
+                    };
+                })
+            };
+            rebuiltMainSlices.push({
+                id: `race_${id}`,
+                raceId: id,
+                name: raceLabel,
+                probability: id === 'dwarf' ? 2 : 5,
+                color: raceColor,
+                linkedWheelId: wheelId
+            });
         });
 
-        if (changed) {
-            app.saveToStorage();
-            app.updateUI();
-            app.draw();
-        }
+        // Preserve user-created non-predefined wheels, while rebuilding every standard race link.
+        Object.keys(oldWheels).forEach(id => {
+            if (!rebuiltWheels[id]) rebuiltWheels[id] = oldWheels[id];
+        });
+        app.wheels = rebuiltWheels;
+        app.currentWheelId = 'main';
+        app.wheelHistory = [];
+        app.slices = rebuiltMainSlices;
+        app.currentRotation = 0;
+        app.wheelTitle.textContent = 'Main Wheel';
+        app.updateUI();
+        app.draw();
+        app.saveToStorage();
         window.dispatchEvent(new CustomEvent('wheel-data-restored'));
     }
 
-    document.addEventListener('DOMContentLoaded', () => window.setTimeout(restoreRaces, 150));
+    document.addEventListener('DOMContentLoaded', () => window.setTimeout(rebuildRaces, 250));
 })();

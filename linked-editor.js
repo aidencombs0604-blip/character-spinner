@@ -98,8 +98,8 @@
         editor.querySelectorAll('.slice-link-select').forEach(linkSelect => {
             linkSelect.addEventListener('change', () => setSliceLink(id, linkSelect));
         });
-        editor.querySelectorAll('.new-link-button').forEach(button => {
-            button.addEventListener('click', () => createAndLinkWheel(id, button));
+        editor.querySelectorAll('.link-existing-button').forEach(button => {
+            button.addEventListener('click', () => openLinkModal(id, button));
         });
     }
 
@@ -127,7 +127,9 @@
                 <div class="editor-actions">
                     <button class="btn btn-success save-editor-slice" type="button">Save slice</button>
                     <button class="btn slice-delete delete-editor-slice" type="button">Delete slice</button>
-                    <button class="btn btn-primary new-link-button" type="button">Create & link new wheel</button>
+
+                    <!-- NEW: unified Link button -->
+                    <button class="btn btn-primary link-existing-button" type="button">Link</button>
                 </div>
                 <span class="linked-save-status" aria-live="polite"></span>
             </div>`;
@@ -190,18 +192,24 @@
         renderSelectedWheel();
     }
 
-    function createAndLinkWheel(parentWheelId, button) {
+    // NEW: Use existing modal for linking
+    function openLinkModal(wheelId, button) {
         const row = button.closest('.linked-slice-editor');
-        const parentSlice = getWheel(parentWheelId)?.slices[Number(row.dataset.sliceIndex)];
-        if (!parentSlice) return;
-        const name = window.prompt('Name for the new linked wheel:');
-        if (!name || !name.trim()) return;
-        const app = getApp();
-        const id = `wheel_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        app.wheels[id] = { id, name: name.trim(), slices: [] };
-        parentSlice.linkedWheelId = id;
-        saveChanges();
-        renderWheelOptions(id);
+        const sliceIndex = Number(row.dataset.sliceIndex);
+        const slice = getWheel(wheelId)?.slices[sliceIndex];
+        if (!slice) return;
+
+        // Use existing modal from script.js
+        window.wheel.selectedSliceForLink = slice.id;
+        document.getElementById('sliceNameModal').textContent = slice.name;
+
+        const list = document.getElementById('wheelsList');
+        list.innerHTML = Object.keys(window.wheel.wheels)
+            .filter(w => w !== wheelId)
+            .map(w => `<div class="wheel-option" onclick="wheel.selectWheelForLink('${w}')">${window.wheel.wheels[w].name}</div>`)
+            .join('');
+
+        document.getElementById('wheelModal').classList.add('show');
     }
 
     function deleteWheel(id) {
